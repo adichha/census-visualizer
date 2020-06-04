@@ -4,3 +4,6 @@ MySQL
 identifier: cs348-census-viz
 master username: admin
 master password: cH5J5fvqs3pWShv3
+endpoint: cs348-census-viz.c2dn6v5sjxgn.us-east-2.rds.amazonaws.com:3306
+JDBC url: jdbc:mysql://cs348-census-viz.c2dn6v5sjxgn.us-east-2.rds.amazonaws.com:3306
+database: censusdat
