@@ -1,0 +1,6 @@
+RDS settings:
+
+MySQL
+identifier: cs348-census-viz
+master username: admin
+master password: cH5J5fvqs3pWShv3
