@@ -5,7 +5,7 @@ USE censusdat;
 CREATE TABLE user_profiles
 (
 	uid INT AUTO_INCREMENT PRIMARY KEY,
-	username VARCHAR(32) NOT NULL,
+	username VARCHAR(32) NOT NULL UNIQUE,
 	first_name VARCHAR(32) NOT NULL,
 	last_name VARCHAR(32) NOT NULL,
 	password_hash CHAR(32) NOT NULL,
