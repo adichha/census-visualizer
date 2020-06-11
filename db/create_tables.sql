@@ -136,7 +136,4 @@ CREATE TRIGGER update_last_mod_time_queries
     SET NEW.last_updated = CURRENT_TIMESTAMP();
 
 # TODO:
-# Add dataset LUTs
-# Update ER diagrams
-# Example queries (test dataset + updating user profiles)
-# example output
+#   Add dataset LUTs
