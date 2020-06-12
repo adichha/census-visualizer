@@ -20,6 +20,7 @@ import {
   SettingOutlined,
   LoginOutlined
 } from '@ant-design/icons';
+import { Map } from './Map';
 
 
 const { Header, Content, Footer, Sider } = Layout;
@@ -55,9 +56,9 @@ export class Dashboard extends React.Component {
           </Menu>
         </Sider>
         <Layout className="site-layout">
-          <Content style={{ margin: '16px 16px' }}>
-            Hello this is the content :/
-          </Content>
+          <div style={{ height: '100%', position: 'relative' }}>
+            <Map />
+          </div>
           <Footer style={{ textAlign: 'center' }}>CS 348 Census Visualization ©2020</Footer>
         </Layout>
       </Layout>
