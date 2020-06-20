@@ -1,6 +1,6 @@
 import React from 'react';
 import { LoginPage } from '../login/LoginPage';
-import { Layout, Menu, Breadcrumb, Select, Checkbox, Row, Col, Button } from 'antd';
+import { Layout, Menu, Breadcrumb, Select, Checkbox, Row, Col, Button} from 'antd';
 import {
   DesktopOutlined,
   PieChartOutlined,
