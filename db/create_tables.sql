@@ -46,7 +46,9 @@ CREATE TABLE sex_lut
 CREATE TABLE geocode_lut
 (
   geocode VARCHAR(64) NOT NULL PRIMARY KEY,
-  geoname VARCHAR(32) NOT NULL
+  geoname VARCHAR(128) NOT NULL,
+  lon DOUBLE NOT NULL,
+  lat DOUBLE NOT NULL
 );
 
 # Actual dataset table definitions
