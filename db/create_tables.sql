@@ -8,9 +8,17 @@ CREATE TABLE user_profiles
 	username VARCHAR(32) NOT NULL UNIQUE,
 	first_name VARCHAR(32) NOT NULL,
 	last_name VARCHAR(32) NOT NULL,
-	password_hash CHAR(32) NOT NULL,
+	password_hash VARCHAR(100) NOT NULL,
 	salt CHAR(16) NOT NULL,
 	num_queries INT NOT NULL DEFAULT 0
+);
+
+# One login per user, 1-to-1 mapping
+CREATE TABLE login_tokens
+(
+    username VARCHAR(32) NOT NULL UNIQUE,
+    token VARCHAR(64) NOT NULL PRIMARY KEY,
+    FOREIGN KEY (username) REFERENCES user_profiles(username)
 );
 
 CREATE TABLE saved_queries
