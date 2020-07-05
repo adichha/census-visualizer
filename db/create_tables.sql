@@ -51,6 +51,12 @@ CREATE TABLE sex_lut
     display_name VARCHAR(128) NOT NULL
 );
 
+CREATE TABLE education_level_lut
+(
+    id CHAR(2) NOT NULL PRIMARY KEY,
+    display_name VARCHAR(128) NOT NULL
+);
+
 CREATE TABLE geocode_lut
 (
   geocode VARCHAR(64) NOT NULL PRIMARY KEY,
