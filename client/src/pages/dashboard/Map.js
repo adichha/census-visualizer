@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import ReactMapGL, {Source, Layer} from 'react-map-gl';
 import {heatmapLayer} from './map-style';
+import {heatmapLayer2} from './map-style2';
 import ControlPanel from './control-panel';
 import {json as requestJson} from 'd3-request';
 import {Switch as Toggle} from 'antd';
@@ -109,6 +110,7 @@ export class Map extends Component {
         >
         {data && (<Source type="geojson" data={data}>
           <Layer {...heatmapLayer} />
+          <Layer {...heatmapLayer2} />
         </Source>)}
         
         {/* Control panel could be used to say filter the results of the feature by census year */}
