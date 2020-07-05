@@ -26,7 +26,7 @@ class UserProfileController(
     private val b64e = Base64.getEncoder()
 
     @PostMapping("/register", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun register(@RequestBody registerRequest: UserRegisterDTO) {
+    fun register(@RequestBody registerRequest: UserRegisterDTO): String {
         // password salt + hash
         val salt = UUID.randomUUID().toString().substring(0..15)
         val hashed = md.digest((registerRequest.password + salt).toByteArray(Charsets.UTF_8))
@@ -42,7 +42,12 @@ class UserProfileController(
                 salt = salt
         )
 
-        userRepo.save(record)
+        try {
+            userRepo.save(record)
+        } catch (e: Exception) {
+            return "{ \"success\": false }"
+        }
+        return "{ \"success\": true }"
     }
 
     @PostMapping("/login", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
