@@ -1,10 +1,19 @@
 import React, { Component } from 'react';
-import ReactMapGL, {Source, Layer} from 'react-map-gl';
-import {heatmapLayer} from './map-style';
-import {heatmapLayer2} from './map-style2';
+import ReactMapGL, { Source, Layer } from 'react-map-gl';
+import { heatmapLayer } from './map-style';
+import { heatmapLayer2 } from './map-style2';
 import ControlPanel from './control-panel';
-import {json as requestJson} from 'd3-request';
-import {Switch as Toggle} from 'antd';
+import { json as requestJson } from 'd3-request';
+import { Switch as Toggle, Layout, Typography, Button } from 'antd';
+import {
+  PlusOutlined
+} from '@ant-design/icons'
+import { CreateSearchQueryModal } from './modal/CreateSearchQueryModal';
+
+const { Sider, Content } = Layout;
+
+const { Title } = Typography;
+
 
 function filterFeaturesByDay(featureCollection, time) {
   const date = new Date(time);
@@ -19,7 +28,7 @@ function filterFeaturesByDay(featureCollection, time) {
       featureDate.getDate() === day
     );
   });
-  return {type: 'FeatureCollection', features};
+  return { type: 'FeatureCollection', features };
 }
 
 export class Map extends Component {
@@ -37,12 +46,13 @@ export class Map extends Component {
       startTime: current,
       endTime: current,
       selectedTime: current,
+      modalVisible: false,
       earthquakes: null,
       mapStyle: "mapbox://styles/mapbox/light-v9"
     };
-  } 
+  }
 
-  componentDidMount(){
+  componentDidMount() {
     requestJson(
       'https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson',
       (error, response) => {
@@ -65,10 +75,10 @@ export class Map extends Component {
 
   toggleDarkMode = checked => {
     console.log(`checked = ${checked}`);
-    if(checked){
-      this.setState({mapStyle: "mapbox://styles/mapbox/dark-v9"})
-    } else{
-      this.setState({mapStyle: "mapbox://styles/mapbox/light-v9"}) 
+    if (checked) {
+      this.setState({ mapStyle: "mapbox://styles/mapbox/dark-v9" })
+    } else {
+      this.setState({ mapStyle: "mapbox://styles/mapbox/light-v9" })
     }
   }
 
@@ -78,14 +88,14 @@ export class Map extends Component {
   }
 
   _handleChangeDay = time => {
-    this.setState({selectedTime: time});
+    this.setState({ selectedTime: time });
     if (this.state.earthquakes) {
-      this.setState({data: filterFeaturesByDay(this.state.earthquakes, time)});
+      this.setState({ data: filterFeaturesByDay(this.state.earthquakes, time) });
     }
   };
 
   _handleChangeAllDay = allDay => {
-    this.setState({allDay});
+    this.setState({ allDay });
     if (this.state.earthquakes) {
       this.setState({
         data: allDay
@@ -96,25 +106,48 @@ export class Map extends Component {
   };
 
   render() {
-    const {viewport, data, allDay, selectedTime, startTime, endTime, mapStyle} = this.state;
+    const { viewport, data, allDay, selectedTime, startTime, endTime, mapStyle } = this.state;
 
     return (
-      <div style={{ height: '100%', position: 'relative' }}>
-        <ReactMapGL
-          width='100%'
-          height='100%'
-          mapStyle={mapStyle}
-          {...this.state.viewport}
-          onViewportChange={viewport => this.onViewportChange(viewport)}
-          mapboxApiAccessToken='pk.eyJ1IjoidHBpbnRvNyIsImEiOiJja2JicWYwMzkwM3NnMnNtZnZkbXU5dGhkIn0.NdzHwoMYvZ-fSTIA9xXXfw'
-        >
-        {data && (<Source type="geojson" data={data}>
-          <Layer {...heatmapLayer} />
-          <Layer {...heatmapLayer2} />
-        </Source>)}
-        
-        {/* Control panel could be used to say filter the results of the feature by census year */}
-        {/* <ControlPanel
+      <Layout style={{ minHeight: '100%' }}>
+        <CreateSearchQueryModal
+          visible={this.state.modalVisible}
+          onCreate={(values) => {
+            console.log(values);
+          }}
+          onCancel={() => {
+            this.setState({
+              modalVisible: false
+            })
+          }}
+        />
+        <Sider theme='light' collapsible={false} collapsed={false} width={400} style={{ padding: 20 }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between'
+          }}>
+            <Title level={3}>Query Builder</Title>
+            <Button type="dashed" onClick={() => this.setState({ modalVisible: true })} icon={<PlusOutlined />} />
+          </div>
+        </Sider>
+        <Layout>
+          <Content>
+            <div style={{ height: '100%', position: 'relative' }}>
+              <ReactMapGL
+                width='100%'
+                height='100%'
+                mapStyle={mapStyle}
+                {...this.state.viewport}
+                onViewportChange={viewport => this.onViewportChange(viewport)}
+                mapboxApiAccessToken='pk.eyJ1IjoidHBpbnRvNyIsImEiOiJja2JicWYwMzkwM3NnMnNtZnZkbXU5dGhkIn0.NdzHwoMYvZ-fSTIA9xXXfw'
+              >
+                {data && (<Source type="geojson" data={data}>
+                  <Layer {...heatmapLayer} />
+                  <Layer {...heatmapLayer2} />
+                </Source>)}
+
+                {/* Control panel could be used to say filter the results of the feature by census year */}
+                {/* <ControlPanel
           containerComponent={this.props.containerComponent}
           startTime={startTime}
           endTime={endTime}
@@ -123,10 +156,13 @@ export class Map extends Component {
           onChangeDay={this._handleChangeDay}
           onChangeAllDay={this._handleChangeAllDay}
         /> */}
-        </ReactMapGL> 
+              </ReactMapGL>
 
         Dark Mode <Toggle onChange={this.toggleDarkMode} />
-      </div>
+            </div>
+          </Content>
+        </Layout>
+      </Layout>
     );
   }
 }
