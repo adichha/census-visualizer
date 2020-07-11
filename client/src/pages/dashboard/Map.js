@@ -3,7 +3,7 @@ import ReactMapGL, { Source, Layer } from 'react-map-gl';
 import { heatmapLayer } from './map-style';
 import ControlPanel from './control-panel';
 import { json as requestJson } from 'd3-request';
-import { Switch as Toggle, Layout, Typography, Button, Checkbox } from 'antd';
+import { List, Switch as Toggle, Layout, Typography, Button, Checkbox } from 'antd';
 import {
   PlusOutlined
 } from '@ant-design/icons'
@@ -49,7 +49,7 @@ export class Map extends Component {
       mapStyle: "mapbox://styles/mapbox/light-v9",
       isShowFirstLayer: true,
       isShowSecondLayer: true,
-      queries: [],
+      queries: []
     };
   }
 
@@ -74,6 +74,23 @@ export class Map extends Component {
     );
   }
 
+  deleteQueries = () => {
+    const queries = this.state.queries; 
+    let size = queries.length;
+    for(let i = 0; i < size; ++i){
+      console.log(queries[i].selected);
+      if(queries[i].selected){
+        queries.splice(i, 1);
+        --i;
+        --size;
+      }
+    }
+    for(let i = 0; i < size; ++i){
+      queries[i].selected = false;
+    }
+    this.setState({queries: queries});
+  }
+
   toggleDarkMode = checked => {
     console.log(`checked = ${checked}`);
     if (checked) {
@@ -83,14 +100,51 @@ export class Map extends Component {
     }
   }
 
+  toggleQuerySelected = (query) => {
+    console.log(query);
+    const index = this.queryExists(query);
+    console.log(index);
+    if(index >= 0){
+      const queries = this.state.queries;
+      queries[index].selected = !queries[index].selected;
+      this.setState({queries: queries});
+    }
+  }
+
   toggleIsShowFirstLayer = checked => {
-    this.setState({ isShowFirstLayer: !checked })
+    this.setState({ isShowFirstLayer: !checked });
   }
 
   toggleIsShowSecondLayer = checked => {
-    this.setState({ isShowSecondLayer: !checked })
+    this.setState({ isShowSecondLayer: !checked });
   }
 
+  queryExists = (query) => {
+    const queries = this.state.queries;
+    for(let i = 0; i < queries.length; ++i){
+      if(queries[i].query === query.query) return i;
+    }
+    return -1;
+  }
+
+  buildQuery = query => {
+    const { database, age_lower, age_upper, sex } = query;
+    let str = "";
+    str += `Showing ${database}`;
+
+    if (sex) {
+      str += ` where sex is ${sex}`
+    }
+
+    if (sex && (age_lower || age_upper)) {
+      str += ' and';
+    }
+
+    if (age_lower || age_upper) {
+      str += ` where age is between ${age_lower || 0} and ${age_upper || 100}`
+    }
+    return str;
+  }
 
   onViewportChange = viewport => {
     const { width, height, ...etc } = viewport
@@ -141,11 +195,18 @@ export class Map extends Component {
         <CreateSearchQueryModal
           visible={this.state.modalVisible}
           onCreate={(values) => {
+            console.log(values);
             const oldQueries = this.state.queries;
-            oldQueries.push(values);
+            const query = {
+              "query": this.buildQuery(values),
+              "selected": false
+            };
+            if(this.queryExists(query) === -1){
+              oldQueries.push(query);
+            }
             this.setState({
               modalVisible: false,
-              queries: oldQueries,
+              queries: oldQueries
             })
           }}
           onCancel={() => {
@@ -161,27 +222,14 @@ export class Map extends Component {
           }}>
             <Title level={3}>Query Builder</Title>
             <Button type="dashed" onClick={() => this.setState({ modalVisible: true })} icon={<PlusOutlined />} />
+            <Button type="dashed" onClick={() => this.deleteQueries()} icon={<PlusOutlined />} />
             <br />
           </div>
+          <List>
           {this.state.queries.map(query => {
-            const { database, age_lower, age_upper, sex } = query;
-            let str = "";
-            str += `Showing ${database}`;
-
-            if (sex) {
-              str += ` where sex is ${sex}`
-            }
-
-            if (sex && (age_lower || age_upper)) {
-              str += ' and';
-            }
-
-            if (age_lower || age_upper) {
-              str += ` where age is between ${age_lower || 0} and ${age_upper || 100}`
-            }
-            return <div>{str}</div>
+            return <List.Item><Checkbox onChange={() => this.toggleQuerySelected(query)}>{query.query}</Checkbox></List.Item>
           })}
-          <Checkbox onChange={e => console.log(e)}>Something</Checkbox>
+          </List>
         </Sider>
         <Layout>
           <Content>
@@ -209,7 +257,7 @@ export class Map extends Component {
                 }
               </ReactMapGL>
 
-              {/* Dark Mode <Toggle onChange={this.toggleDarkMode} /> */}
+              Dark Mode <Toggle onChange={this.toggleDarkMode} />
             </div>
           </Content>
         </Layout >

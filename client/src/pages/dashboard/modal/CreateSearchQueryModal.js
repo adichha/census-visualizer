@@ -9,6 +9,7 @@ export const CreateSearchQueryModal = ({
   onCreate,
   onCancel,
 }) => {
+  let selectedEmployment = false;
   const [form] = Form.useForm();
   return (
     <Modal
@@ -21,6 +22,7 @@ export const CreateSearchQueryModal = ({
         form
           .validateFields()
           .then(values => {
+            console.log(values);
             form.resetFields();
             onCreate(values);
           })
@@ -37,6 +39,7 @@ export const CreateSearchQueryModal = ({
         <Form.Item
           name="database"
           label="Database"
+          rules={[{ required: true }]}
         >
           <Select
             showSearch
@@ -44,7 +47,7 @@ export const CreateSearchQueryModal = ({
             placeholder="Select a database"
           >
             <Option value="education">Education</Option>
-            <Option value="empolyment">Employment</Option>
+            <Option value="employment">Employment</Option>
           </Select>
         </Form.Item>
 
@@ -60,10 +63,11 @@ export const CreateSearchQueryModal = ({
             placeholder="Select a sex"
             defaultValue={["male", "female"]}
             optionFilterProp="male"
+            value={["male", "female"]}
           >
             <Option value="male">Male</Option>
             <Option value="female">Female</Option>
-          </Select>,
+          </Select>
         </Form.Item>
 
         <div style={{ color: 'black' }}>
