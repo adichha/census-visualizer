@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^7.2.1",
     "ant-design-pro": "^2.3.2",
     "antd": "^4.3.3",
+    "axios": "^0.19.2",
     "d3-request": "^1.0.6",
     "mobx": "^5.15.4",
     "mobx-react": "^6.2.2",
@@ -40,5 +41,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-decorators": "^7.10.4"
   }
 }

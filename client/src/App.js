@@ -11,7 +11,7 @@ import {
 } from "react-router-dom";
 import { TopNavigationBar } from './pages/home/TopNavigationBar';
 import { Dashboard } from './pages/dashboard/Dashboard';
-
+import { PersistenceStore } from './stores/PersistenceStore';
 const { Header, Content, Footer, Sider } = Layout;
 const { Title } = Typography;
 
@@ -23,35 +23,41 @@ const Container = styled.div`
   transform: translate(-50%, -50%);
 `;
 
-function App() {
-  return (
-    <Router>
-      <Switch>
-        <Route path="/login">
-          <TopNavigationBar />
-          <Container>
-            <LoginPage />
-          </Container>
-        </Route>
-        <Route path="/register">
-          <TopNavigationBar />
-          <Container>
-            <RegisterPage />
-          </Container>
-        </Route>
-        <Route path="/dashboard">
-          <Dashboard />
-        </Route>
-        <Route path="/">
-          <TopNavigationBar />
-          <Container>
-            <Title level={1} style={{ textAlign: 'center' }}>CS 348 Project</Title>
-            <Title level={3} style={{ textAlign: 'center' }}>Census Data Visualization</Title>
-          </Container>
-        </Route>
-      </Switch>
-    </Router>
-  );
+export class App extends React.Component {
+  componentDidMount() {
+    PersistenceStore.fetchItems();
+  }
+
+  render() {
+    return (
+      <Router>
+        <Switch>
+          <Route path="/login">
+            <TopNavigationBar />
+            <Container>
+              <LoginPage />
+            </Container>
+          </Route>
+          <Route path="/register">
+            <TopNavigationBar />
+            <Container>
+              <RegisterPage />
+            </Container>
+          </Route>
+          <Route path="/dashboard">
+            <Dashboard />
+          </Route>
+          <Route path="/">
+            <TopNavigationBar />
+            <Container>
+              <Title level={1} style={{ textAlign: 'center' }}>CS 348 Project</Title>
+              <Title level={3} style={{ textAlign: 'center' }}>Census Data Visualization</Title>
+            </Container>
+          </Route>
+        </Switch>
+      </Router>
+    );
+  }
 }
 
 export default App;
