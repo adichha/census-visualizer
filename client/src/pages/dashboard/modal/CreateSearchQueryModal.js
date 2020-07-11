@@ -66,24 +66,32 @@ export const CreateSearchQueryModal = ({
           </Select>,
         </Form.Item>
 
+        <div style={{ color: 'black' }}>
+          Age Constraint
+        </div>
+
         <div style={{
           display: 'flex',
           justifyContent: 'space-between'
         }}>
-          <Form.Item name="age_lower" label="Age Lower Bound">
+          <Form.Item name="age_lower" label="Lower Bound">
             <InputNumber
               min={0}
               max={100}
               defaultValue={0}
+              placeholder='0'
               value={0}
             />
           </Form.Item>
 
-          <Form.Item name="age_upper" label="Age Upper Bound">
+          <div style={{ paddingTop: 35 }}>to </div>
+
+          <Form.Item name="age_upper" label="Upper Bound">
             <InputNumber
               min={0}
               max={100}
               defaultValue={100}
+              placeholder='100'
               value={100}
             />
           </Form.Item>
