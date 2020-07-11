@@ -1,6 +1,6 @@
 import React from 'react';
 import { LoginPage } from '../login/LoginPage';
-import { Layout, Menu, Breadcrumb, Select, Checkbox, Row, Col, Button} from 'antd';
+import { Layout, Menu, Breadcrumb, Select, Checkbox, Row, Col, Button } from 'antd';
 import {
   DesktopOutlined,
   PieChartOutlined,
@@ -68,45 +68,45 @@ export class Dashboard extends React.Component {
         </Sider>
         <Layout className="site-layout">
           {/* <Header> */}
-        <Row>
-        <Col span={3}>
-          <Select placeholder="age" style={{ width: 120 }} allowClear>
-          <Option value="15">15-24</Option>
-          <Option value="25">25-34</Option>
-          <Option value="35">35-44</Option>
-          <Option value="45">45-54</Option>
-          <Option value="55">55-64</Option>
-          <Option value="65">65+</Option>
-        </Select></Col>
-        <Col span={3}><Select placeholder="sex" style={{ width: 120 }} allowClear>
-          <Option value="male">Male</Option>
-          <Option value="female">Female</Option>
-        </Select></Col>
-        <Col span={3}><Select placeholder="education" style={{ width: 120 }} allowClear>
-          <Option value="none">None</Option>
-          <Option value="hs">High School</Option>
-          <Option value="associate">Associate Degree</Option>
-          <Option value="bachelor">Bachelor's Degree</Option>
-          <Option value="master">Master's Degree</Option>
-          <Option value="doctoral">Doctoral Degree</Option>
-        </Select></Col>
-        <Col span={3}>
-          <Checkbox onChange={onChange}>Employed</Checkbox>
-        </Col>
-        <Col span={3}>
-          <Select placeholder="income" style={{ width: 120 }} allowClear>
-          <Option value="u30">Under 30,000</Option>
-          <Option value="30">30,000-50,000</Option>
-          <Option value="50">50,000-75,000</Option>
-          <Option value="75">75,000-100,000</Option>
-          <Option value="o100">Over 100,000</Option>
-        </Select></Col>
-        <Button type="primary" icon={<SearchOutlined />}>
-          Search
+          <Row>
+            <Col span={3}>
+              <Select placeholder="age" style={{ width: 120 }} allowClear>
+                <Option value="15">15-24</Option>
+                <Option value="25">25-34</Option>
+                <Option value="35">35-44</Option>
+                <Option value="45">45-54</Option>
+                <Option value="55">55-64</Option>
+                <Option value="65">65+</Option>
+              </Select></Col>
+            <Col span={3}><Select placeholder="sex" style={{ width: 120 }} allowClear>
+              <Option value="male">Male</Option>
+              <Option value="female">Female</Option>
+            </Select></Col>
+            <Col span={3}><Select placeholder="education" style={{ width: 120 }} allowClear>
+              <Option value="none">None</Option>
+              <Option value="hs">High School</Option>
+              <Option value="associate">Associate Degree</Option>
+              <Option value="bachelor">Bachelor's Degree</Option>
+              <Option value="master">Master's Degree</Option>
+              <Option value="doctoral">Doctoral Degree</Option>
+            </Select></Col>
+            <Col span={3}>
+              <Checkbox onChange={onChange}>Employed</Checkbox>
+            </Col>
+            <Col span={3}>
+              <Select placeholder="income" style={{ width: 120 }} allowClear>
+                <Option value="u30">Under 30,000</Option>
+                <Option value="30">30,000-50,000</Option>
+                <Option value="50">50,000-75,000</Option>
+                <Option value="75">75,000-100,000</Option>
+                <Option value="o100">Over 100,000</Option>
+              </Select></Col>
+            <Button type="primary" icon={<SearchOutlined />}>
+              Search
         </Button>
-        <Button>Save Query</Button>
-        </Row>
-        {/* </Header> */}
+            <Button>Save Query</Button>
+          </Row>
+          {/* </Header> */}
           <div style={{ height: '100%', position: 'relative' }}>
             <Map />
           </div>
