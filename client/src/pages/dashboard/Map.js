@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import ReactMapGL, { Source, Layer } from 'react-map-gl';
 import { heatmapLayer } from './map-style';
-import { heatmapLayer2 } from './map-style2';
 import ControlPanel from './control-panel';
 import { json as requestJson } from 'd3-request';
 import { Switch as Toggle, Layout, Typography, Button } from 'antd';
@@ -11,7 +10,6 @@ import {
 import { CreateSearchQueryModal } from './modal/CreateSearchQueryModal';
 
 const { Sider, Content } = Layout;
-
 const { Title } = Typography;
 
 
@@ -48,7 +46,9 @@ export class Map extends Component {
       selectedTime: current,
       modalVisible: false,
       earthquakes: null,
-      mapStyle: "mapbox://styles/mapbox/light-v9"
+      mapStyle: "mapbox://styles/mapbox/light-v9",
+      isShowFirstLayer: true,
+      isShowSecondLayer: true,
     };
   }
 
@@ -82,6 +82,15 @@ export class Map extends Component {
     }
   }
 
+  toggleIsShowFirstLayer = checked => {
+    this.setState({ isShowFirstLayer: !checked })
+  }
+
+  toggleIsShowSecondLayer = checked => {
+    this.setState({ isShowSecondLayer: !checked })
+  }
+
+
   onViewportChange = viewport => {
     const { width, height, ...etc } = viewport
     this.setState({ viewport: etc })
@@ -106,8 +115,26 @@ export class Map extends Component {
   };
 
   render() {
-    const { viewport, data, allDay, selectedTime, startTime, endTime, mapStyle } = this.state;
+    const { viewport, data, allDay, selectedTime, startTime, endTime, mapStyle, isShowFirstLayer, isShowSecondLayer } = this.state;
 
+    let heatmapLayer2 = heatmapLayer
+    heatmapLayer2.paint["heatmap-color"] = [
+      'interpolate',
+      ['linear'],
+      ['heatmap-density'],
+      0,
+      'rgba(33,102,172,0)',
+      0.2,
+      'rgb(11, 64, 8)',
+      0.4,
+      'rgb(29, 89, 25)',
+      0.6,
+      'rgb(34, 181, 24)',
+      0.8,
+      'rgb(111, 217, 104)',
+      0.9,
+      'rgb(165, 230, 161)'
+    ]
     return (
       <Layout style={{ minHeight: '100%' }}>
         <CreateSearchQueryModal
@@ -141,28 +168,26 @@ export class Map extends Component {
                 onViewportChange={viewport => this.onViewportChange(viewport)}
                 mapboxApiAccessToken='pk.eyJ1IjoidHBpbnRvNyIsImEiOiJja2JicWYwMzkwM3NnMnNtZnZkbXU5dGhkIn0.NdzHwoMYvZ-fSTIA9xXXfw'
               >
-                {data && (<Source type="geojson" data={data}>
+
+                {isShowFirstLayer && isShowSecondLayer && data && (<Source type="geojson" data={data}>
+                  {/* ... passes in the key value pairs as props to Layer */}
                   <Layer {...heatmapLayer} />
                   <Layer {...heatmapLayer2} />
-                </Source>)}
-
-                {/* Control panel could be used to say filter the results of the feature by census year */}
-                {/* <ControlPanel
-          containerComponent={this.props.containerComponent}
-          startTime={startTime}
-          endTime={endTime}
-          selectedTime={selectedTime}
-          allDay={allDay}
-          onChangeDay={this._handleChangeDay}
-          onChangeAllDay={this._handleChangeAllDay}
-        /> */}
+                </Source>) ||
+                  isShowFirstLayer && data && (<Source type="geojson" data={data}>
+                    <Layer {...heatmapLayer} />
+                  </Source>) ||
+                  isShowSecondLayer && data && (<Source type="geojson" data={data}>
+                    <Layer {...heatmapLayer2} />
+                  </Source>)
+                }
               </ReactMapGL>
 
-        Dark Mode <Toggle onChange={this.toggleDarkMode} />
+              {/* Dark Mode <Toggle onChange={this.toggleDarkMode} /> */}
             </div>
           </Content>
-        </Layout>
-      </Layout>
+        </Layout >
+      </Layout >
     );
   }
 }
