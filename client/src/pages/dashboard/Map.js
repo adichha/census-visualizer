@@ -3,7 +3,7 @@ import ReactMapGL, { Source, Layer } from 'react-map-gl';
 import { heatmapLayer } from './map-style';
 import ControlPanel from './control-panel';
 import { json as requestJson } from 'd3-request';
-import { Switch as Toggle, Layout, Typography, Button } from 'antd';
+import { Switch as Toggle, Layout, Typography, Button, Checkbox } from 'antd';
 import {
   PlusOutlined
 } from '@ant-design/icons'
@@ -49,6 +49,7 @@ export class Map extends Component {
       mapStyle: "mapbox://styles/mapbox/light-v9",
       isShowFirstLayer: true,
       isShowSecondLayer: true,
+      queries: [],
     };
   }
 
@@ -140,7 +141,12 @@ export class Map extends Component {
         <CreateSearchQueryModal
           visible={this.state.modalVisible}
           onCreate={(values) => {
-            console.log(values);
+            const oldQueries = this.state.queries;
+            oldQueries.push(values);
+            this.setState({
+              modalVisible: false,
+              queries: oldQueries,
+            })
           }}
           onCancel={() => {
             this.setState({
@@ -155,7 +161,27 @@ export class Map extends Component {
           }}>
             <Title level={3}>Query Builder</Title>
             <Button type="dashed" onClick={() => this.setState({ modalVisible: true })} icon={<PlusOutlined />} />
+            <br />
           </div>
+          {this.state.queries.map(query => {
+            const { database, age_lower, age_upper, sex } = query;
+            let str = "";
+            str += `Showing ${database}`;
+
+            if (sex) {
+              str += ` where sex is ${sex}`
+            }
+
+            if (sex && (age_lower || age_upper)) {
+              str += ' and';
+            }
+
+            if (age_lower || age_upper) {
+              str += ` where age is between ${age_lower || 0} and ${age_upper || 100}`
+            }
+            return <div>{str}</div>
+          })}
+          <Checkbox onChange={e => console.log(e)}>Something</Checkbox>
         </Sider>
         <Layout>
           <Content>
