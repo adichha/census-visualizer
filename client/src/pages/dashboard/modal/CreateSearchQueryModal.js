@@ -8,9 +8,42 @@ export const CreateSearchQueryModal = ({
   visible,
   onCreate,
   onCancel,
+  query
 }) => {
   let selectedEmployment = false;
   const [form] = Form.useForm();
+
+  const updateValues = () =>{
+    // could try making for loop 
+    if(query && typeof form.getFieldsValue().database === 'undefined'){
+      form.setFieldsValue({
+        database: query.database
+      })
+    } if(query && typeof form.getFieldsValue().sex === 'undefined'){
+      form.setFieldsValue({
+        sex: query.sex
+      })
+    } if(query && typeof form.getFieldsValue().age_lower === 'undefined'){
+      form.setFieldsValue({
+        age_lower: query.age_lower
+      })
+    } if(query && typeof form.getFieldsValue().age_upper === 'undefined'){
+      form.setFieldsValue({
+        age_lower: query.age_upper
+      })
+    }
+  }
+  React.useEffect(() => {
+    if(query){
+      form.setFieldsValue({
+        database: query.database,
+        sex: query.sex,
+        age_lower: query.age_lower,
+        age_upper: query.age_upper
+      });
+    }
+  }, []);
+
   return (
     <Modal
       visible={visible}
@@ -19,10 +52,11 @@ export const CreateSearchQueryModal = ({
       cancelText="Cancel"
       onCancel={onCancel}
       onOk={() => {
+        updateValues();
+
         form
           .validateFields()
           .then(values => {
-            console.log(values);
             form.resetFields();
             onCreate(values);
           })
@@ -45,6 +79,8 @@ export const CreateSearchQueryModal = ({
             showSearch
             style={{ width: '100%' }}
             placeholder="Select a database"
+            defaultValue={query && query.database}
+            value={query && query.database}
           >
             <Option value="education">Education</Option>
             <Option value="employment">Employment</Option>
@@ -61,9 +97,9 @@ export const CreateSearchQueryModal = ({
             mode="multiple"
             style={{ width: '100%' }}
             placeholder="Select a sex"
-            defaultValue={["male", "female"]}
+            defaultValue={query && query.sex || ["male", "female"]}
             optionFilterProp="male"
-            value={["male", "female"]}
+            value={query && query.sex || ["male", "female"]}
           >
             <Option value="male">Male</Option>
             <Option value="female">Female</Option>
@@ -82,21 +118,21 @@ export const CreateSearchQueryModal = ({
             <InputNumber
               min={0}
               max={100}
-              defaultValue={0}
-              placeholder='0'
-              value={0}
+              defaultValue={query && query.age_lower || 0}
+              placeholder={query && query.age_lower || '0'}
+              value={query && query.age_lower|| 0}
             />
           </Form.Item>
 
           <div style={{ paddingTop: 35 }}>to </div>
-
+{/* Need upper to be bigger than lower? */}
           <Form.Item name="age_upper" label="Upper Bound">
             <InputNumber
               min={0}
               max={100}
-              defaultValue={100}
-              placeholder='100'
-              value={100}
+              defaultValue={query && query.age_upper !== 'undefined' || 100}
+              placeholder={query && query.age_upper || '100'}
+              value={query && query.age_upper !== 'undefined' || 100}
             />
           </Form.Item>
         </div>
