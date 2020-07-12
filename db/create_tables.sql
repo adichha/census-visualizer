@@ -65,6 +65,12 @@ CREATE TABLE geocode_lut
   lat DOUBLE NOT NULL
 );
 
+CREATE TABLE labour_lut
+(
+    id INT NOT NULL PRIMARY KEY,
+    display_name VARCHAR(128) NOT NULL
+);
+
 # Actual dataset table definitions
 
 CREATE TABLE individual_incomes
@@ -112,7 +118,8 @@ CREATE TABLE employment
     FOREIGN KEY (geocode) REFERENCES geocode_lut(geocode),
     FOREIGN KEY (age) REFERENCES age_range_lut(id),
     FOREIGN KEY (sex) REFERENCES sex_lut(id),
-    FOREIGN KEY (region) REFERENCES country_codes_lut(code)
+    FOREIGN KEY (region) REFERENCES country_codes_lut(code),
+    FOREIGN KEY (meta) REFERENCES labour_lut(id)
 );
 
 CREATE TABLE population
