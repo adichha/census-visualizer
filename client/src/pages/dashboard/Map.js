@@ -6,7 +6,8 @@ import { json as requestJson } from 'd3-request';
 import { List, Switch as Toggle, Layout, Typography, Button, Checkbox } from 'antd';
 import {
   PlusOutlined,
-  DeleteOutlined
+  DeleteOutlined,
+  EditOutlined
 } from '@ant-design/icons'
 import { CreateSearchQueryModal } from './modal/CreateSearchQueryModal';
 import { queries } from '@testing-library/react';
@@ -101,7 +102,7 @@ export class Map extends Component {
 
   toggleQuerySelected = (query) => {
     console.log(query);
-    const index = this.queryExists(query);
+    const index = this.queryExists(query, -1);
     console.log(index);
     if(index >= 0){
       const queries = this.state.queries;
@@ -118,10 +119,21 @@ export class Map extends Component {
     this.setState({ isShowSecondLayer: !checked });
   }
 
-  queryExists = (query) => {
+  toggleModalVisible = (index) => {
     const queries = this.state.queries;
-    for(let i = 0; i < queries.length; ++i){
-      if(queries[i].query === query.query) return i;
+    queries[index].modalVisible = !queries[index].modalVisible;
+    this.setState({queries: queries});
+  }
+
+  queryExists = (query, index) => {
+    const queries = this.state.queries;
+    query = query.query;
+    for(let i = 0; i < queries.length && i !== index; ++i){
+      const currQuery = queries[i].query
+      if(query.database === currQuery.database &&
+        query.sex === currQuery.sex &&
+        query.age_lower === currQuery.age_lower &&
+        query.age_upper === currQuery.age_upper ) return i;
     }
     return -1;
   }
@@ -205,10 +217,11 @@ export class Map extends Component {
             console.log(values);
             const oldQueries = this.state.queries;
             const query = {
-              "query": this.buildQuery(values),
-              "selected": false
+              "query": values,
+              "selected": false,
+              "modalVisible": false
             };
-            if(this.queryExists(query) === -1){
+            if(this.queryExists(query, -1) === -1){
               oldQueries.push(query);
             }
             this.setState({
@@ -233,8 +246,30 @@ export class Map extends Component {
             <br />
           </div>
           <List>
-          {this.state.queries.map(query => {
-            return <List.Item><Checkbox checked={query.selected} onChange={() => this.toggleQuerySelected(query)}>{query.query}</Checkbox></List.Item>
+          {this.state.queries.map((query, index) => {
+              return <div><CreateSearchQueryModal
+              visible={query.modalVisible}
+              onCreate={(values) => {
+                console.log(values);
+                const oldQueries = this.state.queries;
+                oldQueries[index].query = values;
+                oldQueries[index].modalVisible = false;
+                // TODO: don't add if already exists
+                if(this.queryExists(oldQueries[index], index) !== -1){
+                  oldQueries.splice(index, 1);
+                }
+                this.setState({
+                  queries: oldQueries
+                })
+              }}
+              onCancel={() => {
+                this.toggleModalVisible(index);
+              }}
+              query={query.query}
+              ></CreateSearchQueryModal>
+            <List.Item><Checkbox checked={query.selected} onChange={() => this.toggleQuerySelected(query)}>{this.buildQuery(query.query)}</Checkbox>
+              <Button type="dashed" onClick={() => this.toggleModalVisible(index)} icon={<EditOutlined />} />
+            </List.Item></div>
           })}
           </List>
         </Sider>
