@@ -5,12 +5,20 @@ USE censusdat;
 CREATE TABLE user_profiles
 (
 	uid INT AUTO_INCREMENT PRIMARY KEY,
-	username VARCHAR(32) NOT NULL,
+	username VARCHAR(32) NOT NULL UNIQUE,
 	first_name VARCHAR(32) NOT NULL,
 	last_name VARCHAR(32) NOT NULL,
-	password_hash CHAR(32) NOT NULL,
+	password_hash VARCHAR(100) NOT NULL,
 	salt CHAR(16) NOT NULL,
 	num_queries INT NOT NULL DEFAULT 0
+);
+
+# One login per user, 1-to-1 mapping
+CREATE TABLE login_tokens
+(
+    username VARCHAR(32) NOT NULL UNIQUE,
+    token VARCHAR(64) NOT NULL PRIMARY KEY,
+    FOREIGN KEY (username) REFERENCES user_profiles(username)
 );
 
 CREATE TABLE saved_queries
@@ -43,10 +51,18 @@ CREATE TABLE sex_lut
     display_name VARCHAR(128) NOT NULL
 );
 
+CREATE TABLE education_level_lut
+(
+    id CHAR(2) NOT NULL PRIMARY KEY,
+    display_name VARCHAR(128) NOT NULL
+);
+
 CREATE TABLE geocode_lut
 (
   geocode VARCHAR(64) NOT NULL PRIMARY KEY,
-  geoname VARCHAR(32) NOT NULL
+  geoname VARCHAR(128) NOT NULL,
+  lon DOUBLE NOT NULL,
+  lat DOUBLE NOT NULL
 );
 
 # Actual dataset table definitions
@@ -136,7 +152,4 @@ CREATE TRIGGER update_last_mod_time_queries
     SET NEW.last_updated = CURRENT_TIMESTAMP();
 
 # TODO:
-# Add dataset LUTs
-# Update ER diagrams
-# Example queries (test dataset + updating user profiles)
-# example output
+#   Add dataset LUTs
