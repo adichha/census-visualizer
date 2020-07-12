@@ -5,9 +5,11 @@ import ControlPanel from './control-panel';
 import { json as requestJson } from 'd3-request';
 import { List, Switch as Toggle, Layout, Typography, Button, Checkbox } from 'antd';
 import {
-  PlusOutlined
+  PlusOutlined,
+  DeleteOutlined
 } from '@ant-design/icons'
 import { CreateSearchQueryModal } from './modal/CreateSearchQueryModal';
+import { queries } from '@testing-library/react';
 
 const { Sider, Content } = Layout;
 const { Title } = Typography;
@@ -85,9 +87,6 @@ export class Map extends Component {
         --size;
       }
     }
-    for(let i = 0; i < size; ++i){
-      queries[i].selected = false;
-    }
     this.setState({queries: queries});
   }
 
@@ -127,6 +126,13 @@ export class Map extends Component {
     return -1;
   }
 
+  querySelected = () => {
+    for(let i = 0; i < this.state.queries.length; ++i){
+      if(this.state.queries[i].selected) return true;
+    }
+    return false;
+  }
+
   buildQuery = query => {
     const { database, age_lower, age_upper, sex } = query;
     let str = "";
@@ -140,6 +146,7 @@ export class Map extends Component {
       str += ' and';
     }
 
+    // make it lower range bound (15, 25, 35)
     if (age_lower || age_upper) {
       str += ` where age is between ${age_lower || 0} and ${age_upper || 100}`
     }
@@ -222,12 +229,12 @@ export class Map extends Component {
           }}>
             <Title level={3}>Query Builder</Title>
             <Button type="dashed" onClick={() => this.setState({ modalVisible: true })} icon={<PlusOutlined />} />
-            <Button type="dashed" onClick={() => this.deleteQueries()} icon={<PlusOutlined />} />
+            <Button type="dashed" disabled={!this.querySelected()} onClick={() => this.deleteQueries()} icon={<DeleteOutlined />} />
             <br />
           </div>
           <List>
           {this.state.queries.map(query => {
-            return <List.Item><Checkbox onChange={() => this.toggleQuerySelected(query)}>{query.query}</Checkbox></List.Item>
+            return <List.Item><Checkbox checked={query.selected} onChange={() => this.toggleQuerySelected(query)}>{query.query}</Checkbox></List.Item>
           })}
           </List>
         </Sider>
