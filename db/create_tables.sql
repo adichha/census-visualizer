@@ -71,6 +71,13 @@ CREATE TABLE labour_lut
     display_name VARCHAR(128) NOT NULL
 );
 
+CREATE TABLE income_meta_lut
+(
+    id INT NOT NULL PRIMARY KEY,
+    display_name VARCHAR(128) NOT NULL
+);
+
+
 # Actual dataset table definitions
 
 CREATE TABLE individual_incomes
@@ -158,5 +165,15 @@ CREATE TRIGGER update_last_mod_time_queries
     FOR EACH ROW
     SET NEW.last_updated = CURRENT_TIMESTAMP();
 
-# TODO:
-#   Add dataset LUTs
+# Indices on the main queried parameters of the datasets:
+CREATE INDEX education_meta_age_sex_index
+	ON education (meta, age, sex);
+
+CREATE INDEX employment_meta_age_sex_index
+	ON employment (meta, age, sex);
+
+CREATE INDEX individual_incomes_meta_age_sex_index
+	ON individual_incomes (meta, age, sex);
+
+CREATE INDEX population_meta_age_sex_index
+	ON population (meta, age, sex);

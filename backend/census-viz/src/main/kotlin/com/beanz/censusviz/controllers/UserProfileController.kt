@@ -1,4 +1,4 @@
-package com.beanz.censusviz
+package com.beanz.censusviz.controllers
 
 import com.beanz.censusviz.records.DLoginToken
 import com.beanz.censusviz.records.DUserProfile
@@ -10,11 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.security.MessageDigest
 import java.util.*
 
-@RestController("/user")
+@RestController
+@RequestMapping("/user")
 class UserProfileController(
         @Autowired
         private val userRepo: UserProfileRepo,
@@ -22,7 +24,7 @@ class UserProfileController(
         private val loginTokens: LoginTokenRepo
 ) {
 
-    private val md = MessageDigest.getInstance("SHA256")
+    private val md = MessageDigest.getInstance("SHA-256")
     private val b64e = Base64.getEncoder()
 
     @PostMapping("/register", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
