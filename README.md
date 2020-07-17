@@ -39,3 +39,19 @@ To populate the meta lut's, such as age_range_lut and income_meta_lut, execute t
 - db/import_labour_lut.sql
 - db/import_income_meta_lut.sql
 - db/import_sex_lut.sql
+
+## Implemented Features
+
+- Add triggers to automatically update certain database fields, including last modified time, and number of queries.
+- Create indexes on data tables to speed up query performance. Reduced average query time from > 1 minute to ~ 2 seconds. 
+- DB Modification - Implement functionality for users to save queries of interest. Users can mark queries as private or public to enable visibility for other users.
+- DB design - Easy database extensibility with lookup tables for quickly adding additional datasets
+- DB design - First class support for spatial data in the database for geographic visualizations (crucial part of our application)
+- DB design - native JSON support within the database to retrieve JSON objects directly from the DB through SQL
+- DB modification - Friends features:
+- Finding profiles by username - lookups
+- Following and unfollowing profiles - modifiable relations
+- View and saving their queries as your own
+- Database security - added authentication between backend and DBMS (as they run on seperate machines) to provide secure access
+
+The triggers and indexs are in the create_table.sql. The CRUD freatures can be found in the code for the backend in the folder backend/source/main/kotlin/com/beanz/censusviz/repos.
