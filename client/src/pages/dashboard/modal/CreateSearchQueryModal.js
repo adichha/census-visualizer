@@ -5,6 +5,7 @@ const { Option } = Select;
 
 
 export const CreateSearchQueryModal = ({
+  isCreate,
   visible,
   onCreate,
   onCancel,
@@ -47,7 +48,7 @@ export const CreateSearchQueryModal = ({
   return (
     <Modal
       visible={visible}
-      title="Create a search query"
+      title={isCreate ? "Create search query" : "Edit search query"}
       okText="Create"
       cancelText="Cancel"
       onCancel={onCancel}

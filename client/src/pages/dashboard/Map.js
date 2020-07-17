@@ -51,26 +51,26 @@ export class Map extends Component {
       earthquakes: null,
       mapStyle: "mapbox://styles/mapbox/light-v9",
       isShowFirstLayer: true,
-      isShowSecondLayer: true,
+      isShowSecondLayer: false,
       queries: []
     };
   }
 
   componentDidMount() {
     requestJson(
-      'https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson',
+      'https://api.jsonbin.io/b/5f0baf3f5d4af74b012b5873',
       (error, response) => {
         if (!error) {
-          const features = response.features;
-          const endTime = features[0].properties.time;
-          const startTime = features[features.length - 1].properties.time;
+          const features = response[0].features;
+          // const endTime = features[0].properties.time;
+          // const startTime = features[features.length - 1].properties.time;
 
           this.setState({
-            data: response,
-            earthquakes: response,
-            endTime,
-            startTime,
-            selectedTime: endTime
+            data: response[0],
+            earthquakes: response[0],
+            // endTime,
+            // startTime,
+            // selectedTime: endTime
           });
         }
       }
@@ -81,7 +81,6 @@ export class Map extends Component {
     const queries = this.state.queries; 
     let size = queries.length;
     for(let i = 0; i < size; ++i){
-      console.log(queries[i].selected);
       if(queries[i].selected){
         queries.splice(i, 1);
         --i;
@@ -101,9 +100,7 @@ export class Map extends Component {
   }
 
   toggleQuerySelected = (query) => {
-    console.log(query);
     const index = this.queryExists(query, -1);
-    console.log(index);
     if(index >= 0){
       const queries = this.state.queries;
       queries[index].selected = !queries[index].selected;
@@ -192,26 +189,27 @@ export class Map extends Component {
     const { viewport, data, allDay, selectedTime, startTime, endTime, mapStyle, isShowFirstLayer, isShowSecondLayer } = this.state;
 
     let heatmapLayer2 = heatmapLayer
-    heatmapLayer2.paint["heatmap-color"] = [
-      'interpolate',
-      ['linear'],
-      ['heatmap-density'],
-      0,
-      'rgba(33,102,172,0)',
-      0.2,
-      'rgb(11, 64, 8)',
-      0.4,
-      'rgb(29, 89, 25)',
-      0.6,
-      'rgb(34, 181, 24)',
-      0.8,
-      'rgb(111, 217, 104)',
-      0.9,
-      'rgb(165, 230, 161)'
-    ]
+    // heatmapLayer2.paint["heatmap-color"] = [
+    //   'interpolate',
+    //   ['linear'],
+    //   ['heatmap-density'],
+    //   0,
+    //   'rgba(33,102,172,0)',
+    //   0.2,
+    //   'rgb(11, 64, 8)',
+    //   0.4,
+    //   'rgb(29, 89, 25)',
+    //   0.6,
+    //   'rgb(34, 181, 24)',
+    //   0.8,
+    //   'rgb(111, 217, 104)',
+    //   0.9,
+    //   'rgb(165, 230, 161)'
+    // ]
     return (
       <Layout style={{ minHeight: '100%' }}>
         <CreateSearchQueryModal
+          isCreate={true}
           visible={this.state.modalVisible}
           onCreate={(values) => {
             console.log(values);
@@ -248,6 +246,7 @@ export class Map extends Component {
           <List>
           {this.state.queries.map((query, index) => {
               return <div><CreateSearchQueryModal
+              isCreate={false}
               visible={query.modalVisible}
               onCreate={(values) => {
                 console.log(values);
@@ -288,13 +287,13 @@ export class Map extends Component {
                 {isShowFirstLayer && isShowSecondLayer && data && (<Source type="geojson" data={data}>
                   {/* ... passes in the key value pairs as props to Layer */}
                   <Layer {...heatmapLayer} />
-                  <Layer {...heatmapLayer2} />
+                  {/* <Layer {...heatmapLayer2} /> */}
                 </Source>) ||
                   isShowFirstLayer && data && (<Source type="geojson" data={data}>
                     <Layer {...heatmapLayer} />
                   </Source>) ||
                   isShowSecondLayer && data && (<Source type="geojson" data={data}>
-                    <Layer {...heatmapLayer2} />
+                    {/* <Layer {...heatmapLayer2} /> */}
                   </Source>)
                 }
               </ReactMapGL>
