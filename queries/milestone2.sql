@@ -1,4 +1,4 @@
-SQL scripts:
+-- SQL scripts:
 
 -- This query facilitates the lookup of geographic data in a certain dataset
 -- filtering on age, sex, and meta parameters
@@ -26,10 +26,10 @@ INSERT INTO user_profiles VALUES (username, first_name, last_name, password_hash
 
 -- Query to check where users that are logged in
 -- Enables authentication check for security purposes
-SELECT * FROM login_tokens t INNER JOIN user_profiles u ON u.username = t.username WHERE t.token = $token;
+SELECT t.username, t.token FROM login_tokens t INNER JOIN user_profiles u ON u.username = t.username WHERE t.token = $token;
 
 -- Query to find profiles by name
 -- Params: a name string
-SELECT * FROM user_profiles WHERE visibility = ‘public’ AND (username LIKE (‘%’ + @input ‘%’) OR first_name LIKE (‘%’ + @input ‘%’) OR last_name LIKE (‘%’ + @input ‘%’)) LIMIT 25 ORDER BY username DESC;
+SELECT username, first_name, last_name FROM user_profiles WHERE visibility = ‘public’ AND (username LIKE (‘%’ + @input ‘%’) OR first_name LIKE (‘%’ + @input ‘%’) OR last_name LIKE (‘%’ + @input ‘%’)) LIMIT 25 ORDER BY username DESC;
 
 -- Rest of the queries are pretty trivial (inserting into relations, etc.)
