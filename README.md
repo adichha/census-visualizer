@@ -36,7 +36,7 @@ In order to create the sample database execute the create table script in the db
 the sample database run test-sample.sql in the queries folder.
 
 ## Populating the DB
-Once the sanitized *_out.csv's have been produced by executing the python script on the raw census dataset, run /queries/import_data.sql. This will populate each DB table with the appropriate data. 
+Once the sanitized *_out.csv's have been produced by executing the python script on the raw census dataset, run /db/import_data.sql. This will populate each DB table with the appropriate data. 
 To populate the meta lut's, such as age_range_lut and income_meta_lut, execute the following sql scripts.
 - db/import_geocode_lut.sql
 - db/import_education_lut.sql
