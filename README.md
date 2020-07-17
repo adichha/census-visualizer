@@ -1,10 +1,12 @@
-# Census-Visualizer-
+# Census-Visualizer
 census data visualizer for cs348
 
 We are running MySQL through Amazon RDS running in an EC2 instance. To set it up, we followed the steps in the documentation here: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_GettingStarted.CreatingConnecting.MySQL.html.
 
 
-We plan to export the publicly available census data on the Canadian and American government websites as .csv files. We will sanitize the input, wrangle it to conform to our schema, and then insert it into the database.
+We plan to export the publicly available census data on the Canadian government website as .csv files. We will sanitize the input, wrangle it to conform to our schema, and then insert it into the database.
+
+## Obtaining the dataset
 
 The data for the income table can be downloaded from this link by clicking download entire table CSV file:
 
@@ -30,6 +32,14 @@ https://www12.statcan.gc.ca/census-recensement/2016/dp-pd/dt-td/Rp-eng.cfm?TABID
 
 In order to sanitize the data, run the function sanitize_population in /db/csv_editor.py. Make sure that the csv downloaded from the website is in the same directory as the python script. The outputted file (population_out.csv) will contain the data in a format which can be uploaded into the table.
 
-
 In order to create the sample database execute the create table script in the db folder. In order to populate 
 the sample database run test-sample.sql in the queries folder.
+
+## Populating the DB
+Once the sanitized *_out.csv's have been produced by executing the python script on the raw census dataset, run /queries/import_data.sql. This will populate each DB table with the appropriate data. 
+To populate the meta lut's, such as age_range_lut and income_meta_lut, execute the following sql scripts.
+- db/import_geocode_lut.sql
+- db/import_education_lut.sql
+- db/import_labour_lut.sql
+- db/import_income_meta_lut.sql
+- db/import_sex_lut.sql
