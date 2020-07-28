@@ -31,43 +31,23 @@ function filterFeaturesByDay(featureCollection, time) {
   return { type: 'FeatureCollection', features };
 }
 
-const incomeLUT = {
-  1: "total income",
-  2: "market income",
-  3: "employment income",
-  4: "wages, salaries and commissions",
-  5: "net self-employment income",
-  6: "investment income",
-  7: "private retirement income",
-  8: "market income not included elsewhere",
-  9: "government transfers",
-  10: "OAS and GIS",
-  11: "CPP and QPP",
-  12: "EI benefits",
-  13: "child benefits",
-  14: "other government transfers",
-  15: "after-tax income",
-  16: "income taxes"
-};
-
 const educationLUT = {
-1: "total education",
-2: "no certificate, diploma or degree",
-3: "secondary (high) school diploma or equivalency certificate",
-4: "postsecondary certificate, diploma or degree",
-5: "apprenticeship or trades certificate or diploma",
-6: "trades certificate or diploma other than Certificate of Apprenticeship or Certificate of Qualification",
-7: "certificate of Apprenticeship or Certificate of Qualification",
-8: "college, CEGEP or other non-university certificate or diploma",
-9: "university certificate or diploma below bachelor level",
-10: "university certificate, diploma or degree at bachelor level or above",
-11: "bachelor's degree",
-12: "university certificate or diploma above bachelor level",
-13: "degree in medicine, dentistry, veterinary medicine or optometry",
-14: "master's degree",
-15: "earned doctorate",
+  1: "total education",
+  2: "no certificate, diploma or degree",
+  3: "secondary (high) school diploma or equivalency certificate",
+  4: "postsecondary certificate, diploma or degree",
+  5: "apprenticeship or trades certificate or diploma",
+  6: "trades certificate or diploma other than Certificate of Apprenticeship or Certificate of Qualification",
+  7: "certificate of Apprenticeship or Certificate of Qualification",
+  8: "college, CEGEP or other non-university certificate or diploma",
+  9: "university certificate or diploma below bachelor level",
+  10: "university certificate, diploma or degree at bachelor level or above",
+  11: "bachelor's degree",
+  12: "university certificate or diploma above bachelor level",
+  13: "degree in medicine, dentistry, veterinary medicine or optometry",
+  14: "master's degree",
+  15: "earned doctorate",
 }
-// const incomeLUT = new Map(incomeLUTArray);
 
 export class Map extends Component {
   constructor(props) {
