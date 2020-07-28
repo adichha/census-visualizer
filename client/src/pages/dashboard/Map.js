@@ -74,6 +74,15 @@ export class Map extends Component {
         }
       }
     );
+    this.fetchData();
+
+  }
+
+  async fetchData() {
+    const queries = await Api.fetchAllQueries();
+    // @TODO: Tyler: transform the return type from queries
+    // into this.setState({ queries ....... })...
+    console.log(queries);
   }
 
   deleteQueries = () => {
@@ -277,6 +286,7 @@ export class Map extends Component {
                   if (this.queryExists(oldQueries[index], index) !== -1) {
                     oldQueries.splice(index, 1);
                   }
+                  // TODO: Send the new query to backend using Api.saveQuery(payload)...
                   this.setState({
                     queries: oldQueries
                   })

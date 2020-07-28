@@ -24,15 +24,6 @@ export class Dashboard extends React.Component {
     collapsed: false,
   };
 
-  componentDidMount() {
-    this.fetchData();
-  }
-
-  async fetchData() {
-    const queries = await Api.fetchAllQueries();
-    console.log(queries);
-  }
-
   onCollapse = collapsed => {
     console.log(collapsed);
     this.setState({ collapsed });
