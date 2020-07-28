@@ -90,15 +90,6 @@ export class Map extends Component {
     this.setState({queries: queries});
   }
 
-  toggleDarkMode = checked => {
-    console.log(`checked = ${checked}`);
-    if (checked) {
-      this.setState({ mapStyle: "mapbox://styles/mapbox/dark-v9" })
-    } else {
-      this.setState({ mapStyle: "mapbox://styles/mapbox/light-v9" })
-    }
-  }
-
   toggleQuerySelected = (query) => {
     const index = this.queryExists(query, -1);
     if(index >= 0){
@@ -318,8 +309,6 @@ export class Map extends Component {
                   </Source>)
                 }
               </ReactMapGL>
-
-              Dark Mode <Toggle onChange={this.toggleDarkMode} />
             </div>
           </Content>
         </Layout >

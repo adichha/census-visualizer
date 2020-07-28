@@ -22,7 +22,7 @@ import {
   LoginOutlined
 } from '@ant-design/icons';
 import { Map } from './Map';
-
+import { Settings } from './Settings';
 
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
@@ -36,6 +36,7 @@ function onChange(e) {
 export class Dashboard extends React.Component {
   state = {
     collapsed: false,
+    displayMap: true,
   };
 
   onCollapse = collapsed => {
@@ -53,11 +54,11 @@ export class Dashboard extends React.Component {
         <Sider collapsible collapsed={this.state.collapsed} onCollapse={this.onCollapse}>
           <div className="logo" />
           <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline">
-            <Menu.Item key="1" icon={<PieChartOutlined />}>
+            <Menu.Item key="1" icon={<PieChartOutlined />} onClick={() => this.setState({displayMap : true})}>
               Visualization
             </Menu.Item>
-            <Menu.Item key="2" icon={<SettingOutlined />}>
-              Account Settings
+            <Menu.Item key="2" icon={<SettingOutlined />} onClick={() => this.setState({displayMap : false})}>
+                Account Settings
             </Menu.Item>
             <Menu.Item key="3" icon={<LoginOutlined />}>
               <Link to='/'>
@@ -68,7 +69,11 @@ export class Dashboard extends React.Component {
         </Sider>
         <Layout className="site-layout">
           <div style={{ height: '100%', position: 'relative' }}>
-            <Map />
+            {this.state.displayMap ?
+             <Map /> : 
+             <Settings />
+            }
+            
           </div>
         </Layout>
       </Layout>
