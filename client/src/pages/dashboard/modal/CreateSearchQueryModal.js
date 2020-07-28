@@ -36,13 +36,9 @@ export const CreateSearchQueryModal = ({
       form.setFieldsValue({
         sex: query.sex
       })
-    } if(query && typeof form.getFieldsValue().age_lower === 'undefined'){
+    } if(query && typeof form.getFieldsValue().age === 'undefined'){
       form.setFieldsValue({
-        age_lower: query.age_lower
-      })
-    } if(query && typeof form.getFieldsValue().age_upper === 'undefined'){
-      form.setFieldsValue({
-        age_lower: query.age_upper
+        age: query.age
       })
     }
   }
@@ -54,8 +50,7 @@ export const CreateSearchQueryModal = ({
         income: query.income,
         education: query.education,
         sex: query.sex,
-        age_lower: query.age_lower,
-        age_upper: query.age_upper
+        age: query.age
       });
     }
   }, []);
@@ -182,37 +177,27 @@ export const CreateSearchQueryModal = ({
             <Option value="female">Female</Option>
           </Select>
         </Form.Item>
-
-        <div style={{ color: 'black' }}>
-          Age Constraint
-        </div>
-
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between'
-        }}>
-          <Form.Item name="age_lower" label="Lower Bound">
-            <InputNumber
-              min={0}
-              max={100}
-              defaultValue={query && query.age_lower || 0}
-              placeholder={query && query.age_lower || '0'}
-              value={query && query.age_lower|| 0}
-            />
-          </Form.Item>
-
-          <div style={{ paddingTop: 35 }}>to </div>
-{/* Need upper to be bigger than lower? */}
-          <Form.Item name="age_upper" label="Upper Bound">
-            <InputNumber
-              min={0}
-              max={100}
-              defaultValue={query && query.age_upper !== 'undefined' || 100}
-              placeholder={query && query.age_upper || '100'}
-              value={query && query.age_upper !== 'undefined' || 100}
-            />
-          </Form.Item>
-        </div>
+        <Form.Item
+          name="age"
+          label="Age Constraint"
+          rules={[{ required: false }]}
+        >
+          <Select
+            showSearch
+            mode="multiple"
+            style={{ width: '100%' }}
+            placeholder="Select age intervals"
+            defaultValue={query && query.age || []}
+            value={query && query.age || []}
+          >
+            <Option value="15-24">15-24</Option>
+            <Option value="25-34">25-34</Option>
+            <Option value="35-44">35-44</Option>
+            <Option value="45-54">45-54</Option>
+            <Option value="55-64">55-64</Option>
+            <Option value="65+">65+</Option>
+          </Select>
+        </Form.Item>
       </Form>
     </Modal>
   );

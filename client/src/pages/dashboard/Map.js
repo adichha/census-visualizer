@@ -49,6 +49,24 @@ const educationLUT = {
   15: "earned doctorate",
 }
 
+const educationLUTReverse = {
+  "total education": 1,
+  "no certificate, diploma or degree": 2,
+  "secondary (high) school diploma or equivalency certificate": 3,
+  "postsecondary certificate, diploma or degree": 4,
+  "apprenticeship or trades certificate or diploma": 5,
+  "trades certificate or diploma other than Certificate of Apprenticeship or Certificate of Qualification": 6,
+  "certificate of Apprenticeship or Certificate of Qualification": 7,
+  "college, CEGEP or other non-university certificate or diploma": 8,
+  "university certificate or diploma below bachelor level": 9,
+  "university certificate, diploma or degree at bachelor level or above": 10,
+  "bachelor's degree": 11,
+  "university certificate or diploma above bachelor level": 12,
+  "degree in medicine, dentistry, veterinary medicine or optometry": 13,
+  "master's degree": 14,
+  "earned doctorate": 15,
+}
+
 const incomeLUT = {
   1: "total income",
   2: "market income",
@@ -67,6 +85,53 @@ const incomeLUT = {
   15: "after-tax income",
   16: "income taxes"
 };
+
+const incomeLUTReverse = {
+  "total income": 1,
+  "market income" : 2,
+  "employment income": 3,
+  "wages, salaries and commissions": 4,
+  "net self-employment income": 5,
+  "investment income": 6,
+  "private retirement income": 7,
+  "market income not included elsewhere": 8,
+  "government transfers": 9,
+  "OAS and GIS": 10,
+  "CPP and QPP": 11,
+  "EI benefits": 12,
+  "child benefits": 13,
+  "other government transfers": 14,
+  "after-tax income": 15,
+  "income taxes": 16
+};
+
+const sexLUT = {
+  1: "male",
+  2: "female"
+};
+
+const sexLUTReverse = {
+  "male": 1,
+  "female": 2
+};
+
+const ageLUT = {
+  1: "15-24",
+  2: "25-34",
+  3: "35-44", 
+  4: "45-54",
+  5: "55-64",
+  6: "65+"
+}
+
+const ageLUTReverse = {
+  "15-24": 1,
+  "25-34": 2,
+  "35-44": 3, 
+  "45-54": 4,
+  "55-64": 5,
+  "65+": 6
+}
 
 export class Map extends Component {
   constructor(props) {
@@ -125,25 +190,78 @@ export class Map extends Component {
       const apiQuery = apiQueries[i];
       const education = [];
       const income = [];
-      if(apiQuery.dataset === "education"){
-        for(let j = 0; j < apiQuery.length; ++j){
-          education.push(educationLUT[apiQuery.params[i]]);
+      const sex = [];
+      const age = [];
+      if(!(apiQuery.params.length == 1 && apiQuery.params[0] == 1)){
+        if(apiQuery.dataset === "education"){
+
+          for(let j = 0; j < apiQuery.params.length; ++j){
+            education.push(educationLUT[apiQuery.params[j]]);
+          }
+        } else if(apiQuery.dataset === "employment"){
+          for(let j = 0; j < apiQuery.params.length; ++j){
+            income.push(incomeLUT[apiQuery.params[j]]);
+          }
         }
-      } else if(apiQuery.dataset === "employment"){
-        for(let j = 0; j < apiQuery.length; ++j){
-          income.push(incomeLUT[apiQuery.params[i]]);
+      }
+      sex = apiQuery.sex ? [sexLUT[apiQuery.sex]] : ["male", "female"];
+      if(apiQuery.age){
+        for(let j = 0; j < apiQuery.age.length; ++j){
+          age.push(ageLUT[apiQuery.age[j]]);
         }
       }
       // TODO: need to fix age in query builder
       const query = {
         database: apiQuery.dataset,
         education: education,
-        income: income
+        income: income, 
+        sex: sex, 
+        age: age
       };
+      
       queries.push(query);
     }
     this.setState({ queries: queries });
     console.log(apiQueries);
+  }
+
+  async saveQuery(query){
+    const params = [];
+    // TODO: if all length or none, do total. 
+    if(query.database === "education"){
+      if(query.education.length == 0  || query.education.length == 14){
+        params.push(1);
+      } else{
+        for(let i = 0; i < query.education.length; ++i){
+          params.push(educationLUTReverse[query.education[i]]);
+        }
+      }
+    } else if(query.database === "employment"){
+      if(query.income.length == 0  || query.income.length == 14){
+        params.push(1);
+      } else{
+        for(let i = 0; i < query.income.length; ++i){
+          params.push(incomeLUTReverse[query.income[i]]);
+        }
+      }
+    }
+    const apiQuery = [{
+      "dataset": query.database,
+      "params": params,
+    }];
+    if(query.sex && query.sex.length == 1){
+      apiQuery[0].sex = sexLUTReverse[query.sex[0]];
+    }
+    if(query.age && query.age.length > 1){
+      const age = [];
+      for(let i = 0; i < query.age.length; ++i){
+        age.push(ageLUTReverse[query.age[i]]);
+      }
+      apiQuery[0].age = age;
+    }
+    console.log(apiQuery);
+    await Api.saveQuery(apiQuery);
+
   }
 
   deleteQueries = () => {
@@ -191,8 +309,7 @@ export class Map extends Component {
         query.sex === currQuery.sex &&
         query.income == currQuery.income &&
         query.education == currQuery.education &&
-        query.age_lower === currQuery.age_lower &&
-        query.age_upper === currQuery.age_upper) return i;
+        query.age === currQuery.age) return i;
     }
     return -1;
   }
@@ -214,17 +331,17 @@ export class Map extends Component {
   }
 
   buildQuery = query => {
-    const { database, age_lower, age_upper, sex, income, education } = query;
+    const { database, age, sex, income, education } = query;
     let str = "";
     str += `Showing`;
     if (database === "employment") {
-      if (!income || income.length == 15) {
+      if (!income || income.length == 0 || income.length == 15) {
         str += ` total income`;
       } else {
         str += this.buildQueryArrayHelper(income);
       }
     } else if (database === "education") {
-      if (!education || education.length == 14) {
+      if (!education || education.length == 0 || education.length == 14) {
         str += ` total education`;
       } else {
         str += this.buildQueryArrayHelper(education);
@@ -233,19 +350,20 @@ export class Map extends Component {
     str += ` from ${database}`;
     if (sex) {
       if(sex.length == 0){
-
+        // TODO: add to male/female?
       }
       str += ` where sex is `;
       str += this.buildQueryArrayHelper(sex);
     }
 
-    if (sex && (age_lower || age_upper)) {
+    if (sex && age && age.length > 0) {
       str += ' and';
     }
 
     // make it lower range bound (15, 25, 35)
-    if (age_lower || age_upper) {
-      str += ` where age is between ${age_lower || 0} and ${age_upper || 100}`
+    if (age && age.length > 0) {
+      str += ` where age is `;
+      str += this.buildQueryArrayHelper(age);
     }
     return str;
   }
@@ -313,6 +431,7 @@ export class Map extends Component {
             };
             if (this.queryExists(query, -1) === -1) {
               oldQueries.push(query);
+              this.saveQuery(query.query);
             }
             this.setState({
               modalVisible: false,
@@ -345,9 +464,12 @@ export class Map extends Component {
                   const oldQueries = this.state.queries;
                   oldQueries[index].query = values;
                   oldQueries[index].modalVisible = false;
-                  // TODO: don't add if already exists
+                  // don't add if already exists
                   if (this.queryExists(oldQueries[index], index) !== -1) {
                     oldQueries.splice(index, 1);
+                    // TODO: call deleteQuery
+                  } else {
+                    this.saveQuery(oldQueries[index].query);
                   }
                   // TODO: Send the new query to backend using Api.saveQuery(payload)...
                   this.setState({
