@@ -41,13 +41,4 @@ export class Api {
     return data
   }
 
-  // query = /user/query
-
-  static fetchUser = async () => {
-    const data = await Api.createRequest(
-      'users/me',
-      'GET'
-    )
-    return data
-  }
 }
