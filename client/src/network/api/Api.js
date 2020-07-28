@@ -41,4 +41,13 @@ export class Api {
     return data
   }
 
+  static fetchAllQueries = async () => {
+    const data = await Api.createRequest('user/saved_queries', 'GET');
+    return data;
+  }
+
+  static saveQuery = async (payload) => {
+    const data = await Api.createRequest('user/save_queries', 'POST', payload);
+    return data;
+  }
 }

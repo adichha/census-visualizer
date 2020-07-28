@@ -25,13 +25,24 @@ const Container = styled.div`
 
 
 export class App extends React.Component {
+  state = {
+    loading: true
+  }
+
   componentDidMount() {
-    PersistenceStore.fetchItems();
+    this.fetchData();
+  }
+
+  async fetchData() {
+    await PersistenceStore.fetchItems();
+    this.setState({
+      loading: false
+    })
   }
 
   render() {
     return (
-      <Observer>{() =>
+      !this.state.loading && <Observer>{() =>
         <Router>
           <Switch>
             <Route path="/login">

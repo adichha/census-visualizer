@@ -11,6 +11,7 @@ import {
   LoginOutlined
 } from '@ant-design/icons';
 import { Map } from './Map';
+import { Api } from '../../network/api/Api';
 
 const { Sider } = Layout;
 
@@ -22,6 +23,15 @@ export class Dashboard extends React.Component {
   state = {
     collapsed: false,
   };
+
+  componentDidMount() {
+    this.fetchData();
+  }
+
+  async fetchData() {
+    const queries = await Api.fetchAllQueries();
+    console.log(queries);
+  }
 
   onCollapse = collapsed => {
     console.log(collapsed);
