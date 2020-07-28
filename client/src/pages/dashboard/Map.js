@@ -38,8 +38,8 @@ export class Map extends Component {
     const current = new Date().getTime();
     this.state = {
       viewport: {
-        latitude: 37.7577,
-        longitude: -122.4376,
+        latitude: 43.4643,
+        longitude: -80.5204,
         zoom: 8
       },
       data: null,
@@ -129,6 +129,8 @@ export class Map extends Component {
       const currQuery = queries[i].query
       if(query.database === currQuery.database &&
         query.sex === currQuery.sex &&
+        query.income == currQuery.income &&
+        query.education == currQuery.education &&
         query.age_lower === currQuery.age_lower &&
         query.age_upper === currQuery.age_upper ) return i;
     }
@@ -143,10 +145,29 @@ export class Map extends Component {
   }
 
   buildQuery = query => {
-    const { database, age_lower, age_upper, sex } = query;
+    const { database, age_lower, age_upper, sex, income, education } = query;
     let str = "";
-    str += `Showing ${database}`;
-
+    str += `Showing`;
+    if(database === "employment"){
+      if(!income || income.length == 15){
+        str += ` total income`;
+      }else {
+        for(let i = 0; i < income.length; ++i){
+          str += ` ${income[i]}`;
+          if(i < income.length - 1) str += `,`;
+        }
+      }
+    } else if(database === "education"){
+      if(!education || education.length == 14){
+        str += ` total education`;
+      }else {
+        for(let i = 0; i < education.length; ++i){
+          str += ` ${education[i]}`;
+          if(i < education.length - 1) str += `,`;
+        }
+      }
+    }
+    str += ` from ${database}`;
     if (sex) {
       str += ` where sex is ${sex}`
     }
