@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import ReactMapGL, { Source, Layer } from 'react-map-gl';
 import { heatmapLayer } from './map-style';
-import ControlPanel from './control-panel';
 import { json as requestJson } from 'd3-request';
 import { List, Switch as Toggle, Layout, Typography, Button, Checkbox } from 'antd';
 import {
@@ -11,7 +10,7 @@ import {
 } from '@ant-design/icons'
 import { CreateSearchQueryModal } from './modal/CreateSearchQueryModal';
 import { queries } from '@testing-library/react';
-
+import { Api } from '../../network/api/Api';
 const { Sider, Content } = Layout;
 const { Title } = Typography;
 
@@ -31,6 +30,44 @@ function filterFeaturesByDay(featureCollection, time) {
   });
   return { type: 'FeatureCollection', features };
 }
+
+const incomeLUT = {
+  1: "total income",
+  2: "market income",
+  3: "employment income",
+  4: "wages, salaries and commissions",
+  5: "net self-employment income",
+  6: "investment income",
+  7: "private retirement income",
+  8: "market income not included elsewhere",
+  9: "government transfers",
+  10: "OAS and GIS",
+  11: "CPP and QPP",
+  12: "EI benefits",
+  13: "child benefits",
+  14: "other government transfers",
+  15: "after-tax income",
+  16: "income taxes"
+};
+
+const educationLUT = {
+1: "total education",
+2: "no certificate, diploma or degree",
+3: "secondary (high) school diploma or equivalency certificate",
+4: "postsecondary certificate, diploma or degree",
+5: "apprenticeship or trades certificate or diploma",
+6: "trades certificate or diploma other than Certificate of Apprenticeship or Certificate of Qualification",
+7: "certificate of Apprenticeship or Certificate of Qualification",
+8: "college, CEGEP or other non-university certificate or diploma",
+9: "university certificate or diploma below bachelor level",
+10: "university certificate, diploma or degree at bachelor level or above",
+11: "bachelor's degree",
+12: "university certificate or diploma above bachelor level",
+13: "degree in medicine, dentistry, veterinary medicine or optometry",
+14: "master's degree",
+15: "earned doctorate",
+}
+// const incomeLUT = new Map(incomeLUTArray);
 
 export class Map extends Component {
   constructor(props) {
@@ -75,27 +112,60 @@ export class Map extends Component {
         }
       }
     );
+    this.fetchData();
+
+  }
+
+  async fetchData() {
+    const apiQueries = await Api.fetchAllQueries();
+    // @TODO: Tyler: transform the return type from queries
+    // into this.setState({ queries ....... })...
+    let queries = [];
+    for(let i = 0; i < apiQueries.length; ++i){
+      // note: need to deal w query exists?
+      const apiQuery = apiQueries[i];
+      const education = [];
+      const income = [];
+      if(apiQuery.dataset === "education"){
+        for(let j = 0; j < apiQuery.length; ++j){
+          education.push(educationLUT[apiQuery.params[i]]);
+        }
+      } else if(apiQuery.dataset === "employment"){
+        for(let j = 0; j < apiQuery.length; ++j){
+          income.push(incomeLUT[apiQuery.params[i]]);
+        }
+      }
+      // TODO: need to fix age in query builder
+      const query = {
+        database: apiQuery.dataset,
+        education: education,
+        income: income
+      };
+      queries.push(query);
+    }
+    this.setState({ queries: queries });
+    console.log(apiQueries);
   }
 
   deleteQueries = () => {
-    const queries = this.state.queries; 
+    const queries = this.state.queries;
     let size = queries.length;
-    for(let i = 0; i < size; ++i){
-      if(queries[i].selected){
+    for (let i = 0; i < size; ++i) {
+      if (queries[i].selected) {
         queries.splice(i, 1);
         --i;
         --size;
       }
     }
-    this.setState({queries: queries});
+    this.setState({ queries: queries });
   }
 
   toggleQuerySelected = (query) => {
     const index = this.queryExists(query, -1);
-    if(index >= 0){
+    if (index >= 0) {
       const queries = this.state.queries;
       queries[index].selected = !queries[index].selected;
-      this.setState({queries: queries});
+      this.setState({ queries: queries });
     }
   }
 
@@ -110,57 +180,64 @@ export class Map extends Component {
   toggleModalVisible = (index) => {
     const queries = this.state.queries;
     queries[index].modalVisible = !queries[index].modalVisible;
-    this.setState({queries: queries});
+    this.setState({ queries: queries });
   }
 
   queryExists = (query, index) => {
     const queries = this.state.queries;
     query = query.query;
-    for(let i = 0; i < queries.length && i !== index; ++i){
+    for (let i = 0; i < queries.length && i !== index; ++i) {
       const currQuery = queries[i].query
-      if(query.database === currQuery.database &&
+      if (query.database === currQuery.database &&
         query.sex === currQuery.sex &&
         query.income == currQuery.income &&
         query.education == currQuery.education &&
         query.age_lower === currQuery.age_lower &&
-        query.age_upper === currQuery.age_upper ) return i;
+        query.age_upper === currQuery.age_upper) return i;
     }
     return -1;
   }
 
   querySelected = () => {
-    for(let i = 0; i < this.state.queries.length; ++i){
-      if(this.state.queries[i].selected) return true;
+    for (let i = 0; i < this.state.queries.length; ++i) {
+      if (this.state.queries[i].selected) return true;
     }
     return false;
+  }
+
+  buildQueryArrayHelper = (array) => {
+    let str = "";
+    for (let i = 0; i < array.length; ++i) {
+      str += ` ${array[i]}`;
+      if (i < array.length - 1) str += `,`;
+    }
+    return str; 
   }
 
   buildQuery = query => {
     const { database, age_lower, age_upper, sex, income, education } = query;
     let str = "";
     str += `Showing`;
-    if(database === "employment"){
-      if(!income || income.length == 15){
+    if (database === "employment") {
+      if (!income || income.length == 15) {
         str += ` total income`;
-      }else {
-        for(let i = 0; i < income.length; ++i){
-          str += ` ${income[i]}`;
-          if(i < income.length - 1) str += `,`;
-        }
+      } else {
+        str += this.buildQueryArrayHelper(income);
       }
-    } else if(database === "education"){
-      if(!education || education.length == 14){
+    } else if (database === "education") {
+      if (!education || education.length == 14) {
         str += ` total education`;
-      }else {
-        for(let i = 0; i < education.length; ++i){
-          str += ` ${education[i]}`;
-          if(i < education.length - 1) str += `,`;
-        }
+      } else {
+        str += this.buildQueryArrayHelper(education);
       }
     }
     str += ` from ${database}`;
     if (sex) {
-      str += ` where sex is ${sex}`
+      if(sex.length == 0){
+
+      }
+      str += ` where sex is `;
+      str += this.buildQueryArrayHelper(sex);
     }
 
     if (sex && (age_lower || age_upper)) {
@@ -224,6 +301,10 @@ export class Map extends Component {
           isCreate={true}
           visible={this.state.modalVisible}
           onCreate={(values) => {
+            // default no sexes to both sexes
+            if(typeof values.sex != 'undefined' && values.sex.length == 0){
+              values.sex = ["male", "female"];
+            }
             console.log(values);
             const oldQueries = this.state.queries;
             const query = {
@@ -231,7 +312,7 @@ export class Map extends Component {
               "selected": false,
               "modalVisible": false
             };
-            if(this.queryExists(query, -1) === -1){
+            if (this.queryExists(query, -1) === -1) {
               oldQueries.push(query);
             }
             this.setState({
@@ -256,32 +337,33 @@ export class Map extends Component {
             <br />
           </div>
           <List>
-          {this.state.queries.map((query, index) => {
+            {this.state.queries.map((query, index) => {
               return <div><CreateSearchQueryModal
-              isCreate={false}
-              visible={query.modalVisible}
-              onCreate={(values) => {
-                console.log(values);
-                const oldQueries = this.state.queries;
-                oldQueries[index].query = values;
-                oldQueries[index].modalVisible = false;
-                // TODO: don't add if already exists
-                if(this.queryExists(oldQueries[index], index) !== -1){
-                  oldQueries.splice(index, 1);
-                }
-                this.setState({
-                  queries: oldQueries
-                })
-              }}
-              onCancel={() => {
-                this.toggleModalVisible(index);
-              }}
-              query={query.query}
+                isCreate={false}
+                visible={query.modalVisible}
+                onCreate={(values) => {
+                  console.log(values);
+                  const oldQueries = this.state.queries;
+                  oldQueries[index].query = values;
+                  oldQueries[index].modalVisible = false;
+                  // TODO: don't add if already exists
+                  if (this.queryExists(oldQueries[index], index) !== -1) {
+                    oldQueries.splice(index, 1);
+                  }
+                  // TODO: Send the new query to backend using Api.saveQuery(payload)...
+                  this.setState({
+                    queries: oldQueries
+                  })
+                }}
+                onCancel={() => {
+                  this.toggleModalVisible(index);
+                }}
+                query={query.query}
               ></CreateSearchQueryModal>
-            <List.Item><Checkbox checked={query.selected} onChange={() => this.toggleQuerySelected(query)}>{this.buildQuery(query.query)}</Checkbox>
-              <Button type="dashed" onClick={() => this.toggleModalVisible(index)} icon={<EditOutlined />} />
-            </List.Item></div>
-          })}
+                <List.Item><Checkbox checked={query.selected} onChange={() => this.toggleQuerySelected(query)}>{this.buildQuery(query.query)}</Checkbox>
+                  <Button type="dashed" onClick={() => this.toggleModalVisible(index)} icon={<EditOutlined />} />
+                </List.Item></div>
+            })}
           </List>
         </Sider>
         <Layout>

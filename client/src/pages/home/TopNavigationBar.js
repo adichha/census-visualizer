@@ -37,11 +37,6 @@ export class TopNavigationBar extends React.Component {
               Home
         </Link></Menu.Item>
           <Menu.Item
-            key="dashboard">
-            <Link to="/dashboard">
-              Dashboard
-        </Link></Menu.Item>
-          <Menu.Item
             key="register">
             <Link to="/register">
               Register

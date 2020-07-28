@@ -1,33 +1,23 @@
 import React from 'react';
-import { LoginPage } from '../login/LoginPage';
-import { Layout, Menu, Breadcrumb, Select, Checkbox, Row, Col, Button } from 'antd';
+import { Layout, Menu } from 'antd';
 import {
-  DesktopOutlined,
   PieChartOutlined,
-  FileOutlined,
-  TeamOutlined,
-  UserOutlined,
-  SearchOutlined
+  SettingOutlined
 } from '@ant-design/icons';
 import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
   Link
 } from "react-router-dom";
 
 import {
-  PieChartOutline,
-  SettingOutlined,
   LoginOutlined
 } from '@ant-design/icons';
 import { Map } from './Map';
 import { Settings } from './Settings';
 
-const { Header, Content, Footer, Sider } = Layout;
-const { SubMenu } = Menu;
-const { Option } = Select;
 
+import { Api } from '../../network/api/Api';
+
+const { Sider } = Layout;
 
 function onChange(e) {
   console.log(`checked = ${e.target.checked}`);
