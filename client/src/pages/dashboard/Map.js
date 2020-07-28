@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import ReactMapGL, { Source, Layer } from 'react-map-gl';
 import { heatmapLayer } from './map-style';
-import ControlPanel from './control-panel';
 import { json as requestJson } from 'd3-request';
-import { Switch as Toggle, Layout, Typography, Button, Checkbox } from 'antd';
+import { Layout, Typography, Button, Checkbox } from 'antd';
 import {
   PlusOutlined
 } from '@ant-design/icons'

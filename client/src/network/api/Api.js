@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { UserStore } from '../../stores/UserStore'
 
-export const baseUrl = 'http://localhost:8081/api/v1/'
+export const baseUrl = 'http://census-viz.herokuapp.com/'
 
 export class Api {
   static createRequest = (
@@ -31,15 +31,17 @@ export class Api {
     })
 
   static signUpUser = async (payload) => {
-    await Api.createRequest('auth/signup', 'POST', payload)
+    await Api.createRequest('user/register', 'POST', payload)
   }
 
   static signInUser = async (
     payload
   ) => {
-    const data = await Api.createRequest('auth/login', 'POST', payload)
+    const data = await Api.createRequest('user/login', 'POST', payload)
     return data
   }
+
+  // query = /user/query
 
   static fetchUser = async () => {
     const data = await Api.createRequest(
