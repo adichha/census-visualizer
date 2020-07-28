@@ -49,6 +49,25 @@ const educationLUT = {
   15: "earned doctorate",
 }
 
+const incomeLUT = {
+  1: "total income",
+  2: "market income",
+  3: "employment income",
+  4: "wages, salaries and commissions",
+  5: "net self-employment income",
+  6: "investment income",
+  7: "private retirement income",
+  8: "market income not included elsewhere",
+  9: "government transfers",
+  10: "OAS and GIS",
+  11: "CPP and QPP",
+  12: "EI benefits",
+  13: "child benefits",
+  14: "other government transfers",
+  15: "after-tax income",
+  16: "income taxes"
+};
+
 export class Map extends Component {
   constructor(props) {
     super(props);
