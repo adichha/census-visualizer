@@ -106,31 +106,35 @@ const incomeLUTReverse = {
 };
 
 const sexLUT = {
-  1: "male",
-  2: "female"
+  1: "malefemale",
+  2: "male",
+  3: "female"
 };
 
 const sexLUTReverse = {
-  "male": 1,
-  "female": 2
+  "malefemale" : 1,
+  "male": 2,
+  "female": 3
 };
 
 const ageLUT = {
-  1: "15-24",
-  2: "25-34",
-  3: "35-44", 
-  4: "45-54",
-  5: "55-64",
-  6: "65+"
+  1: "all", // probably don't need
+  2: "15-24",
+  3: "25-34",
+  4: "35-44", 
+  5: "45-54",
+  6: "55-64",
+  7: "65+"
 }
 
 const ageLUTReverse = {
-  "15-24": 1,
-  "25-34": 2,
-  "35-44": 3, 
-  "45-54": 4,
-  "55-64": 5,
-  "65+": 6
+  "all": 1,
+  "15-24": 2,
+  "25-34": 3,
+  "35-44": 4, 
+  "45-54": 5,
+  "55-64": 6,
+  "65+": 7
 }
 
 export class Map extends Component {
@@ -182,6 +186,7 @@ export class Map extends Component {
 
   async fetchData() {
     const apiQueries = await Api.fetchAllQueries();
+    console.log(apiQueries);
     // @TODO: Tyler: transform the return type from queries
     // into this.setState({ queries ....... })...
     let queries = [];
@@ -190,7 +195,7 @@ export class Map extends Component {
       const apiQuery = apiQueries[i];
       const education = [];
       const income = [];
-      const sex = [];
+      let sex = [];
       const age = [];
       if(!(apiQuery.params.length == 1 && apiQuery.params[0] == 1)){
         if(apiQuery.dataset === "education"){
@@ -205,6 +210,7 @@ export class Map extends Component {
         }
       }
       sex = apiQuery.sex ? [sexLUT[apiQuery.sex]] : ["male", "female"];
+      // TODO: i should not be storing malefemale 
       if(apiQuery.age){
         for(let j = 0; j < apiQuery.age.length; ++j){
           age.push(ageLUT[apiQuery.age[j]]);
@@ -212,24 +218,30 @@ export class Map extends Component {
       }
       // TODO: need to fix age in query builder
       const query = {
+        qid: apiQuery.qid,
         database: apiQuery.dataset,
         education: education,
         income: income, 
         sex: sex, 
         age: age
       };
+      const queryWrapper = {
+        "query": query,
+        "selected": false,
+        "modalVisible": false
+      };
       
-      queries.push(query);
+      queries.push(queryWrapper);
     }
     this.setState({ queries: queries });
-    console.log(apiQueries);
+    console.log(this.state.queries);
   }
 
   async saveQuery(query){
     const params = [];
     // TODO: if all length or none, do total. 
     if(query.database === "education"){
-      if(query.education.length == 0  || query.education.length == 14){
+      if(!query.education || query.education.length == 0  || query.education.length == 14){
         params.push(1);
       } else{
         for(let i = 0; i < query.education.length; ++i){
@@ -237,7 +249,7 @@ export class Map extends Component {
         }
       }
     } else if(query.database === "employment"){
-      if(query.income.length == 0  || query.income.length == 14){
+      if(!query.income || query.income.length == 0  || query.income.length == 14){
         params.push(1);
       } else{
         for(let i = 0; i < query.income.length; ++i){
@@ -249,9 +261,6 @@ export class Map extends Component {
       "dataset": query.database,
       "params": params,
     }];
-    if(query.sex && query.sex.length == 1){
-      apiQuery[0].sex = sexLUTReverse[query.sex[0]];
-    }
     if(query.age && query.age.length > 1){
       const age = [];
       for(let i = 0; i < query.age.length; ++i){
@@ -259,22 +268,38 @@ export class Map extends Component {
       }
       apiQuery[0].age = age;
     }
+    else apiQuery[0].age = [1];
+    if(query.sex && query.sex.length == 1){
+      apiQuery[0].sex = sexLUTReverse[query.sex[0]];
+    } else apiQuery[0].sex = 1;
+    console.log(query);
+    if(query.qid){
+      apiQuery[0].qid = query.qid;
+    }
     console.log(apiQuery);
-    await Api.saveQuery(apiQuery);
-
+    let data = await Api.saveQuery(apiQuery);
+    return data;
   }
 
-  deleteQueries = () => {
+  async deleteQueries(){
     const queries = this.state.queries;
+    const queriesToDelete = [];
     let size = queries.length;
     for (let i = 0; i < size; ++i) {
       if (queries[i].selected) {
+        queriesToDelete.push(queries[i].query.qid);
         queries.splice(i, 1);
         --i;
         --size;
       }
     }
     this.setState({ queries: queries });
+    await this.deleteQueriesAPI(queriesToDelete);
+  }
+
+  async deleteQueriesAPI(qids){
+    console.log(qids);
+    await Api.deleteQueries(qids);
   }
 
   toggleQuerySelected = (query) => {
@@ -331,41 +356,43 @@ export class Map extends Component {
   }
 
   buildQuery = query => {
-    const { database, age, sex, income, education } = query;
-    let str = "";
-    str += `Showing`;
-    if (database === "employment") {
-      if (!income || income.length == 0 || income.length == 15) {
-        str += ` total income`;
-      } else {
-        str += this.buildQueryArrayHelper(income);
+    if(query !== undefined){
+      const { database, age, sex, income, education } = query;
+      let str = "";
+      str += `Showing`;
+      if (database === "employment") {
+        if (!income || income.length == 0 || income.length == 15) {
+          str += ` total income`;
+        } else {
+          str += this.buildQueryArrayHelper(income);
+        }
+      } else if (database === "education") {
+        if (!education || education.length == 0 || education.length == 14) {
+          str += ` total education`;
+        } else {
+          str += this.buildQueryArrayHelper(education);
+        }
       }
-    } else if (database === "education") {
-      if (!education || education.length == 0 || education.length == 14) {
-        str += ` total education`;
-      } else {
-        str += this.buildQueryArrayHelper(education);
+      str += ` from ${database}`;
+      if (sex) {
+        if(sex.length == 0){
+          // TODO: add to male/female?
+        }
+        str += ` where sex is `;
+        str += this.buildQueryArrayHelper(sex);
       }
-    }
-    str += ` from ${database}`;
-    if (sex) {
-      if(sex.length == 0){
-        // TODO: add to male/female?
-      }
-      str += ` where sex is `;
-      str += this.buildQueryArrayHelper(sex);
-    }
 
-    if (sex && age && age.length > 0) {
-      str += ' and';
-    }
+      if (sex && age && age.length > 0) {
+        str += ' and';
+      }
 
-    // make it lower range bound (15, 25, 35)
-    if (age && age.length > 0) {
-      str += ` where age is `;
-      str += this.buildQueryArrayHelper(age);
+      // make it lower range bound (15, 25, 35)
+      if (age && age.length > 0) {
+        str += ` where age is `;
+        str += this.buildQueryArrayHelper(age);
+      }
+      return str;
     }
-    return str;
   }
 
   onViewportChange = viewport => {
@@ -390,6 +417,17 @@ export class Map extends Component {
       });
     }
   };
+
+  // TODO : execute
+  // query (POST)
+  // user/query 
+  // pass in by qid (array) -> list 
+  // returns a geojson 
+
+  // TODO : friends pages
+  // find profiles
+  // add friends
+  // list friends
 
   render() {
     const { viewport, data, allDay, selectedTime, startTime, endTime, mapStyle, isShowFirstLayer, isShowSecondLayer } = this.state;
@@ -430,8 +468,9 @@ export class Map extends Component {
               "modalVisible": false
             };
             if (this.queryExists(query, -1) === -1) {
+              // need to save query id
+              query.query.qid = this.saveQuery(query.query);
               oldQueries.push(query);
-              this.saveQuery(query.query);
             }
             this.setState({
               modalVisible: false,
@@ -462,16 +501,18 @@ export class Map extends Component {
                 onCreate={(values) => {
                   console.log(values);
                   const oldQueries = this.state.queries;
+                  values.qid = oldQueries[index].query.qid;
                   oldQueries[index].query = values;
                   oldQueries[index].modalVisible = false;
                   // don't add if already exists
                   if (this.queryExists(oldQueries[index], index) !== -1) {
+                    this.deleteQueries([oldQueries[index].query.qid]);
                     oldQueries.splice(index, 1);
                     // TODO: call deleteQuery
                   } else {
+                    // TODO: should update instead of creating a new one 
                     this.saveQuery(oldQueries[index].query);
                   }
-                  // TODO: Send the new query to backend using Api.saveQuery(payload)...
                   this.setState({
                     queries: oldQueries
                   })

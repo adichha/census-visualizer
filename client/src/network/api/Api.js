@@ -21,6 +21,7 @@ export class Api {
           },
           data: payload || {},
         })
+        console.log(response);
         resolve(response.data)
       } catch (e) {
         const {
@@ -34,9 +35,7 @@ export class Api {
     await Api.createRequest('user/register', 'POST', payload)
   }
 
-  static signInUser = async (
-    payload
-  ) => {
+  static signInUser = async (payload) => {
     const data = await Api.createRequest('user/login', 'POST', payload)
     return data
   }
@@ -49,5 +48,9 @@ export class Api {
   static saveQuery = async (payload) => {
     const data = await Api.createRequest('user/save_queries', 'POST', payload);
     return data;
+  }
+
+  static deleteQueries = async (payload) => {
+    await Api.createRequest('user/delete_queries', 'POST', payload);
   }
 }
