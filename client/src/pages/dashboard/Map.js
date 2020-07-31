@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import ReactMapGL, { Source, Layer } from 'react-map-gl';
 import { heatmapLayer } from './map-style';
-import ControlPanel from './control-panel';
 import { json as requestJson } from 'd3-request';
 import { List, Switch as Toggle, Layout, Typography, Button, Checkbox } from 'antd';
 import {
@@ -11,7 +10,7 @@ import {
 } from '@ant-design/icons'
 import { CreateSearchQueryModal } from './modal/CreateSearchQueryModal';
 import { queries } from '@testing-library/react';
-
+import { Api } from '../../network/api/Api';
 const { Sider, Content } = Layout;
 const { Title } = Typography;
 
@@ -32,14 +31,120 @@ function filterFeaturesByDay(featureCollection, time) {
   return { type: 'FeatureCollection', features };
 }
 
+const educationLUT = {
+  1: "total education",
+  2: "no certificate, diploma or degree",
+  3: "secondary (high) school diploma or equivalency certificate",
+  4: "postsecondary certificate, diploma or degree",
+  5: "apprenticeship or trades certificate or diploma",
+  6: "trades certificate or diploma other than Certificate of Apprenticeship or Certificate of Qualification",
+  7: "certificate of Apprenticeship or Certificate of Qualification",
+  8: "college, CEGEP or other non-university certificate or diploma",
+  9: "university certificate or diploma below bachelor level",
+  10: "university certificate, diploma or degree at bachelor level or above",
+  11: "bachelor's degree",
+  12: "university certificate or diploma above bachelor level",
+  13: "degree in medicine, dentistry, veterinary medicine or optometry",
+  14: "master's degree",
+  15: "earned doctorate",
+}
+
+const educationLUTReverse = {
+  "total education": 1,
+  "no certificate, diploma or degree": 2,
+  "secondary (high) school diploma or equivalency certificate": 3,
+  "postsecondary certificate, diploma or degree": 4,
+  "apprenticeship or trades certificate or diploma": 5,
+  "trades certificate or diploma other than Certificate of Apprenticeship or Certificate of Qualification": 6,
+  "certificate of Apprenticeship or Certificate of Qualification": 7,
+  "college, CEGEP or other non-university certificate or diploma": 8,
+  "university certificate or diploma below bachelor level": 9,
+  "university certificate, diploma or degree at bachelor level or above": 10,
+  "bachelor's degree": 11,
+  "university certificate or diploma above bachelor level": 12,
+  "degree in medicine, dentistry, veterinary medicine or optometry": 13,
+  "master's degree": 14,
+  "earned doctorate": 15,
+}
+
+const incomeLUT = {
+  1: "total income",
+  2: "market income",
+  3: "employment income",
+  4: "wages, salaries and commissions",
+  5: "net self-employment income",
+  6: "investment income",
+  7: "private retirement income",
+  8: "market income not included elsewhere",
+  9: "government transfers",
+  10: "OAS and GIS",
+  11: "CPP and QPP",
+  12: "EI benefits",
+  13: "child benefits",
+  14: "other government transfers",
+  15: "after-tax income",
+  16: "income taxes"
+};
+
+const incomeLUTReverse = {
+  "total income": 1,
+  "market income" : 2,
+  "employment income": 3,
+  "wages, salaries and commissions": 4,
+  "net self-employment income": 5,
+  "investment income": 6,
+  "private retirement income": 7,
+  "market income not included elsewhere": 8,
+  "government transfers": 9,
+  "OAS and GIS": 10,
+  "CPP and QPP": 11,
+  "EI benefits": 12,
+  "child benefits": 13,
+  "other government transfers": 14,
+  "after-tax income": 15,
+  "income taxes": 16
+};
+
+const sexLUT = {
+  1: "malefemale",
+  2: "male",
+  3: "female"
+};
+
+const sexLUTReverse = {
+  "malefemale" : 1,
+  "male": 2,
+  "female": 3
+};
+
+const ageLUT = {
+  1: "all", // probably don't need
+  2: "15-24",
+  3: "25-34",
+  4: "35-44", 
+  5: "45-54",
+  6: "55-64",
+  7: "65+"
+}
+
+const ageLUTReverse = {
+  "all": 1,
+  "15-24": 2,
+  "25-34": 3,
+  "35-44": 4, 
+  "45-54": 5,
+  "55-64": 6,
+  "65+": 7
+}
+
 export class Map extends Component {
   constructor(props) {
     super(props);
     const current = new Date().getTime();
     this.state = {
       viewport: {
-        latitude: 37.7577,
-        longitude: -122.4376,
+        latitude: 43.4643,
+        longitude: -80.5204,
         zoom: 8
       },
       data: null,
@@ -75,36 +180,134 @@ export class Map extends Component {
         }
       }
     );
+    this.fetchData();
+
   }
 
-  deleteQueries = () => {
-    const queries = this.state.queries; 
+  async fetchData() {
+    const apiQueries = await Api.fetchAllQueries();
+    console.log(apiQueries);
+    // @TODO: Tyler: transform the return type from queries
+    // into this.setState({ queries ....... })...
+    let queries = [];
+    for(let i = 0; i < apiQueries.length; ++i){
+      // note: need to deal w query exists?
+      const apiQuery = apiQueries[i];
+      const education = [];
+      const income = [];
+      let sex = [];
+      const age = [];
+      if(!(apiQuery.params.length == 1 && apiQuery.params[0] == 1)){
+        if(apiQuery.dataset === "education"){
+
+          for(let j = 0; j < apiQuery.params.length; ++j){
+            education.push(educationLUT[apiQuery.params[j]]);
+          }
+        } else if(apiQuery.dataset === "employment"){
+          for(let j = 0; j < apiQuery.params.length; ++j){
+            income.push(incomeLUT[apiQuery.params[j]]);
+          }
+        }
+      }
+      sex = apiQuery.sex ? [sexLUT[apiQuery.sex]] : ["male", "female"];
+      // TODO: i should not be storing malefemale 
+      if(apiQuery.age){
+        for(let j = 0; j < apiQuery.age.length; ++j){
+          age.push(ageLUT[apiQuery.age[j]]);
+        }
+      }
+      // TODO: need to fix age in query builder
+      const query = {
+        qid: apiQuery.qid,
+        database: apiQuery.dataset,
+        education: education,
+        income: income, 
+        sex: sex, 
+        age: age
+      };
+      const queryWrapper = {
+        "query": query,
+        "selected": false,
+        "modalVisible": false
+      };
+      
+      queries.push(queryWrapper);
+    }
+    this.setState({ queries: queries });
+    console.log(this.state.queries);
+  }
+
+  async saveQuery(query){
+    const params = [];
+    // TODO: if all length or none, do total. 
+    if(query.database === "education"){
+      if(!query.education || query.education.length == 0  || query.education.length == 14){
+        params.push(1);
+      } else{
+        for(let i = 0; i < query.education.length; ++i){
+          params.push(educationLUTReverse[query.education[i]]);
+        }
+      }
+    } else if(query.database === "employment"){
+      if(!query.income || query.income.length == 0  || query.income.length == 14){
+        params.push(1);
+      } else{
+        for(let i = 0; i < query.income.length; ++i){
+          params.push(incomeLUTReverse[query.income[i]]);
+        }
+      }
+    }
+    const apiQuery = [{
+      "dataset": query.database,
+      "params": params,
+    }];
+    if(query.age && query.age.length > 1){
+      const age = [];
+      for(let i = 0; i < query.age.length; ++i){
+        age.push(ageLUTReverse[query.age[i]]);
+      }
+      apiQuery[0].age = age;
+    }
+    else apiQuery[0].age = [1];
+    if(query.sex && query.sex.length == 1){
+      apiQuery[0].sex = sexLUTReverse[query.sex[0]];
+    } else apiQuery[0].sex = 1;
+    console.log(query);
+    if(query.qid){
+      apiQuery[0].qid = query.qid;
+    }
+    console.log(apiQuery);
+    let data = await Api.saveQuery(apiQuery);
+    return data;
+  }
+
+  async deleteQueries(){
+    const queries = this.state.queries;
+    const queriesToDelete = [];
     let size = queries.length;
-    for(let i = 0; i < size; ++i){
-      if(queries[i].selected){
+    for (let i = 0; i < size; ++i) {
+      if (queries[i].selected) {
+        queriesToDelete.push(queries[i].query.qid);
         queries.splice(i, 1);
         --i;
         --size;
       }
     }
-    this.setState({queries: queries});
+    this.setState({ queries: queries });
+    await this.deleteQueriesAPI(queriesToDelete);
   }
 
-  toggleDarkMode = checked => {
-    console.log(`checked = ${checked}`);
-    if (checked) {
-      this.setState({ mapStyle: "mapbox://styles/mapbox/dark-v9" })
-    } else {
-      this.setState({ mapStyle: "mapbox://styles/mapbox/light-v9" })
-    }
+  async deleteQueriesAPI(qids){
+    console.log(qids);
+    await Api.deleteQueries(qids);
   }
 
   toggleQuerySelected = (query) => {
     const index = this.queryExists(query, -1);
-    if(index >= 0){
+    if (index >= 0) {
       const queries = this.state.queries;
       queries[index].selected = !queries[index].selected;
-      this.setState({queries: queries});
+      this.setState({ queries: queries });
     }
   }
 
@@ -119,47 +322,77 @@ export class Map extends Component {
   toggleModalVisible = (index) => {
     const queries = this.state.queries;
     queries[index].modalVisible = !queries[index].modalVisible;
-    this.setState({queries: queries});
+    this.setState({ queries: queries });
   }
 
   queryExists = (query, index) => {
     const queries = this.state.queries;
     query = query.query;
-    for(let i = 0; i < queries.length && i !== index; ++i){
+    for (let i = 0; i < queries.length && i !== index; ++i) {
       const currQuery = queries[i].query
-      if(query.database === currQuery.database &&
+      if (query.database === currQuery.database &&
         query.sex === currQuery.sex &&
-        query.age_lower === currQuery.age_lower &&
-        query.age_upper === currQuery.age_upper ) return i;
+        query.income == currQuery.income &&
+        query.education == currQuery.education &&
+        query.age === currQuery.age) return i;
     }
     return -1;
   }
 
   querySelected = () => {
-    for(let i = 0; i < this.state.queries.length; ++i){
-      if(this.state.queries[i].selected) return true;
+    for (let i = 0; i < this.state.queries.length; ++i) {
+      if (this.state.queries[i].selected) return true;
     }
     return false;
   }
 
-  buildQuery = query => {
-    const { database, age_lower, age_upper, sex } = query;
+  buildQueryArrayHelper = (array) => {
     let str = "";
-    str += `Showing ${database}`;
-
-    if (sex) {
-      str += ` where sex is ${sex}`
+    for (let i = 0; i < array.length; ++i) {
+      str += ` ${array[i]}`;
+      if (i < array.length - 1) str += `,`;
     }
+    return str; 
+  }
 
-    if (sex && (age_lower || age_upper)) {
-      str += ' and';
-    }
+  buildQuery = query => {
+    if(query !== undefined){
+      const { database, age, sex, income, education } = query;
+      let str = "";
+      str += `Showing`;
+      if (database === "employment") {
+        if (!income || income.length == 0 || income.length == 15) {
+          str += ` total income`;
+        } else {
+          str += this.buildQueryArrayHelper(income);
+        }
+      } else if (database === "education") {
+        if (!education || education.length == 0 || education.length == 14) {
+          str += ` total education`;
+        } else {
+          str += this.buildQueryArrayHelper(education);
+        }
+      }
+      str += ` from ${database}`;
+      if (sex) {
+        if(sex.length == 0){
+          // TODO: add to male/female?
+        }
+        str += ` where sex is `;
+        str += this.buildQueryArrayHelper(sex);
+      }
 
-    // make it lower range bound (15, 25, 35)
-    if (age_lower || age_upper) {
-      str += ` where age is between ${age_lower || 0} and ${age_upper || 100}`
+      if (sex && age && age.length > 0) {
+        str += ' and';
+      }
+
+      // make it lower range bound (15, 25, 35)
+      if (age && age.length > 0) {
+        str += ` where age is `;
+        str += this.buildQueryArrayHelper(age);
+      }
+      return str;
     }
-    return str;
   }
 
   onViewportChange = viewport => {
@@ -184,6 +417,17 @@ export class Map extends Component {
       });
     }
   };
+
+  // TODO : execute
+  // query (POST)
+  // user/query 
+  // pass in by qid (array) -> list 
+  // returns a geojson 
+
+  // TODO : friends pages
+  // find profiles
+  // add friends
+  // list friends
 
   render() {
     const { viewport, data, allDay, selectedTime, startTime, endTime, mapStyle, isShowFirstLayer, isShowSecondLayer } = this.state;
@@ -212,6 +456,10 @@ export class Map extends Component {
           isCreate={true}
           visible={this.state.modalVisible}
           onCreate={(values) => {
+            // default no sexes to both sexes
+            if(typeof values.sex != 'undefined' && values.sex.length == 0){
+              values.sex = ["male", "female"];
+            }
             console.log(values);
             const oldQueries = this.state.queries;
             const query = {
@@ -219,7 +467,9 @@ export class Map extends Component {
               "selected": false,
               "modalVisible": false
             };
-            if(this.queryExists(query, -1) === -1){
+            if (this.queryExists(query, -1) === -1) {
+              // need to save query id
+              query.query.qid = this.saveQuery(query.query);
               oldQueries.push(query);
             }
             this.setState({
@@ -244,32 +494,38 @@ export class Map extends Component {
             <br />
           </div>
           <List>
-          {this.state.queries.map((query, index) => {
+            {this.state.queries.map((query, index) => {
               return <div><CreateSearchQueryModal
-              isCreate={false}
-              visible={query.modalVisible}
-              onCreate={(values) => {
-                console.log(values);
-                const oldQueries = this.state.queries;
-                oldQueries[index].query = values;
-                oldQueries[index].modalVisible = false;
-                // TODO: don't add if already exists
-                if(this.queryExists(oldQueries[index], index) !== -1){
-                  oldQueries.splice(index, 1);
-                }
-                this.setState({
-                  queries: oldQueries
-                })
-              }}
-              onCancel={() => {
-                this.toggleModalVisible(index);
-              }}
-              query={query.query}
+                isCreate={false}
+                visible={query.modalVisible}
+                onCreate={(values) => {
+                  console.log(values);
+                  const oldQueries = this.state.queries;
+                  values.qid = oldQueries[index].query.qid;
+                  oldQueries[index].query = values;
+                  oldQueries[index].modalVisible = false;
+                  // don't add if already exists
+                  if (this.queryExists(oldQueries[index], index) !== -1) {
+                    this.deleteQueries([oldQueries[index].query.qid]);
+                    oldQueries.splice(index, 1);
+                    // TODO: call deleteQuery
+                  } else {
+                    // TODO: should update instead of creating a new one 
+                    this.saveQuery(oldQueries[index].query);
+                  }
+                  this.setState({
+                    queries: oldQueries
+                  })
+                }}
+                onCancel={() => {
+                  this.toggleModalVisible(index);
+                }}
+                query={query.query}
               ></CreateSearchQueryModal>
-            <List.Item><Checkbox checked={query.selected} onChange={() => this.toggleQuerySelected(query)}>{this.buildQuery(query.query)}</Checkbox>
-              <Button type="dashed" onClick={() => this.toggleModalVisible(index)} icon={<EditOutlined />} />
-            </List.Item></div>
-          })}
+                <List.Item><Checkbox checked={query.selected} onChange={() => this.toggleQuerySelected(query)}>{this.buildQuery(query.query)}</Checkbox>
+                  <Button type="dashed" onClick={() => this.toggleModalVisible(index)} icon={<EditOutlined />} />
+                </List.Item></div>
+            })}
           </List>
         </Sider>
         <Layout>
@@ -297,8 +553,6 @@ export class Map extends Component {
                   </Source>)
                 }
               </ReactMapGL>
-
-              Dark Mode <Toggle onChange={this.toggleDarkMode} />
             </div>
           </Content>
         </Layout >

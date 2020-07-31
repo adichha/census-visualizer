@@ -1,6 +1,8 @@
 import React from 'react';
-import { Card, Typography } from 'antd';
+import { Alert, Card, Typography, message } from 'antd';
 import { Form, Input, Button, Checkbox } from 'antd';
+import { UserStore } from '../../stores/UserStore';
+import { withRouter } from 'react-router';
 const { Title } = Typography;
 
 const layout = {
@@ -11,10 +13,20 @@ const tailLayout = {
   wrapperCol: { offset: 8, span: 16 },
 };
 
-export class LoginPage extends React.Component {
+class LoginPageNoRouter extends React.Component {
+  state = {
+    loginFailed: false
+  }
 
-  onFinish = values => {
-    console.log('Success:', values);
+  onFinish = async (values) => {
+    const loginFailed = await UserStore.loginUser(values);
+    if (!loginFailed) {
+      message.success("Successfully logged in. Welcome!")
+      this.props.history.push('/dashboard')
+    }
+    this.setState({
+      loginFailed
+    })
   };
 
   onFinishFailed = errorInfo => {
@@ -34,6 +46,7 @@ export class LoginPage extends React.Component {
           onFinish={this.onFinish}
           onFinishFailed={this.onFinishFailed}
         >
+          {this.state.loginFailed && <Alert style={{ marginBottom: 20 }} message="Failed to login" type="error" />}
           <Form.Item
             label="Username"
             name="username"
@@ -50,7 +63,7 @@ export class LoginPage extends React.Component {
             <Input.Password />
           </Form.Item>
 
-          <Form.Item {...tailLayout} name="remember" valuePropName="checked">
+          <Form.Item {...tailLayout} valuePropName="checked">
             <Checkbox>Remember me</Checkbox>
           </Form.Item>
 
@@ -64,3 +77,7 @@ export class LoginPage extends React.Component {
     );
   }
 }
+
+const LoginPageWithRouter = withRouter(LoginPageNoRouter);
+
+export { LoginPageWithRouter as LoginPage }

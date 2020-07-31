@@ -89,11 +89,12 @@ CREATE TABLE individual_incomes
     region CHAR(3) NOT NULL,
     geocode VARCHAR(64) NOT NULL,
     value INT NOT NULL, # Absolute number (population value)
-    meta INT NOT NULL,
+    meta CHAR(2) NOT NULL,
     FOREIGN KEY (geocode) REFERENCES geocode_lut(geocode),
     FOREIGN KEY (age) REFERENCES age_range_lut(id),
     FOREIGN KEY (sex) REFERENCES sex_lut(id),
-    FOREIGN KEY (region) REFERENCES country_codes_lut(code)
+    FOREIGN KEY (region) REFERENCES country_codes_lut(code),
+    FOREIGN KEY (meta) REFERENCES income_meta_lut(id)
 );
 
 CREATE TABLE education
@@ -105,11 +106,12 @@ CREATE TABLE education
     region CHAR(3) NOT NULL,
     geocode VARCHAR(64) NOT NULL,
     value INT NOT NULL, # Absolute number (population value)
-    meta INT NOT NULL,
+    meta CHAR(2) NOT NULL,
     FOREIGN KEY (geocode) REFERENCES geocode_lut(geocode),
     FOREIGN KEY (age) REFERENCES age_range_lut(id),
     FOREIGN KEY (sex) REFERENCES sex_lut(id),
-    FOREIGN KEY (region) REFERENCES country_codes_lut(code)
+    FOREIGN KEY (region) REFERENCES country_codes_lut(code),
+    FOREIGN KEY (meta) REFERENCES education_level_lut(id)
 );
 
 CREATE TABLE employment

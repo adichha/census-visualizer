@@ -1,33 +1,23 @@
 import React from 'react';
-import { LoginPage } from '../login/LoginPage';
-import { Layout, Menu, Breadcrumb, Select, Checkbox, Row, Col, Button } from 'antd';
+import { Layout, Menu } from 'antd';
 import {
-  DesktopOutlined,
   PieChartOutlined,
-  FileOutlined,
-  TeamOutlined,
-  UserOutlined,
-  SearchOutlined
+  SettingOutlined
 } from '@ant-design/icons';
 import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
   Link
 } from "react-router-dom";
 
 import {
-  PieChartOutline,
-  SettingOutlined,
   LoginOutlined
 } from '@ant-design/icons';
 import { Map } from './Map';
+import { Settings } from './Settings';
 
 
-const { Header, Content, Footer, Sider } = Layout;
-const { SubMenu } = Menu;
-const { Option } = Select;
+import { Api } from '../../network/api/Api';
 
+const { Sider } = Layout;
 
 function onChange(e) {
   console.log(`checked = ${e.target.checked}`);
@@ -36,6 +26,7 @@ function onChange(e) {
 export class Dashboard extends React.Component {
   state = {
     collapsed: false,
+    displayMap: true,
   };
 
   onCollapse = collapsed => {
@@ -53,11 +44,11 @@ export class Dashboard extends React.Component {
         <Sider collapsible collapsed={this.state.collapsed} onCollapse={this.onCollapse}>
           <div className="logo" />
           <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline">
-            <Menu.Item key="1" icon={<PieChartOutlined />}>
+            <Menu.Item key="1" icon={<PieChartOutlined />} onClick={() => this.setState({displayMap : true})}>
               Visualization
             </Menu.Item>
-            <Menu.Item key="2" icon={<SettingOutlined />}>
-              Account Settings
+            <Menu.Item key="2" icon={<SettingOutlined />} onClick={() => this.setState({displayMap : false})}>
+                Account Settings
             </Menu.Item>
             <Menu.Item key="3" icon={<LoginOutlined />}>
               <Link to='/'>
@@ -68,7 +59,11 @@ export class Dashboard extends React.Component {
         </Sider>
         <Layout className="site-layout">
           <div style={{ height: '100%', position: 'relative' }}>
-            <Map />
+            {this.state.displayMap ?
+             <Map /> : 
+             <Settings />
+            }
+            
           </div>
         </Layout>
       </Layout>

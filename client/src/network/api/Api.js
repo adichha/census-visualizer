@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { UserStore } from '../../stores/UserStore'
 
-export const baseUrl = 'http://localhost:8081/api/v1/'
+export const baseUrl = 'http://census-viz.herokuapp.com/'
 
 export class Api {
   static createRequest = (
@@ -21,6 +21,7 @@ export class Api {
           },
           data: payload || {},
         })
+        console.log(response);
         resolve(response.data)
       } catch (e) {
         const {
@@ -31,21 +32,25 @@ export class Api {
     })
 
   static signUpUser = async (payload) => {
-    await Api.createRequest('auth/signup', 'POST', payload)
+    await Api.createRequest('user/register', 'POST', payload)
   }
 
-  static signInUser = async (
-    payload
-  ) => {
-    const data = await Api.createRequest('auth/login', 'POST', payload)
+  static signInUser = async (payload) => {
+    const data = await Api.createRequest('user/login', 'POST', payload)
     return data
   }
 
-  static fetchUser = async () => {
-    const data = await Api.createRequest(
-      'users/me',
-      'GET'
-    )
-    return data
+  static fetchAllQueries = async () => {
+    const data = await Api.createRequest('user/saved_queries', 'GET');
+    return data;
+  }
+
+  static saveQuery = async (payload) => {
+    const data = await Api.createRequest('user/save_queries', 'POST', payload);
+    return data;
+  }
+
+  static deleteQueries = async (payload) => {
+    await Api.createRequest('user/delete_queries', 'POST', payload);
   }
 }

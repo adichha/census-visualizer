@@ -1,6 +1,9 @@
 import React from 'react';
-import { Card, Typography } from 'antd';
+import { Alert, Card, Typography, message } from 'antd';
 import { Form, Input, Button, Checkbox } from 'antd';
+import { UserStore } from '../../stores/UserStore';
+import { withRouter } from 'react-router-dom'
+
 const { Title } = Typography;
 
 const layout = {
@@ -11,10 +14,20 @@ const tailLayout = {
   wrapperCol: { offset: 8, span: 16 },
 };
 
-export class RegisterPage extends React.Component {
+class RegisterPageNoRouter extends React.Component {
+  state = {
+    registerFailed: false,
 
-  onFinish = values => {
-    console.log('Success:', values);
+  }
+  onFinish = async values => {
+    const registerFailed = await UserStore.signUpUser(values);
+    if (!registerFailed) {
+      message.success("Successfully registered!")
+      this.props.history.push('/login');
+    }
+    this.setState({
+      registerFailed
+    })
   };
 
   onFinishFailed = errorInfo => {
@@ -34,6 +47,7 @@ export class RegisterPage extends React.Component {
           onFinish={this.onFinish}
           onFinishFailed={this.onFinishFailed}
         >
+          {this.state.registerFailed && <Alert style={{ marginBottom: 20 }} message="Failed to register" type="error" />}
           <Form.Item
             label="Username"
             name="username"
@@ -44,7 +58,7 @@ export class RegisterPage extends React.Component {
 
           <Form.Item
             label="First Name"
-            name="firstname"
+            name="first_name"
             rules={[{ required: true, message: 'Please input your first name!' }]}
           >
             <Input />
@@ -52,7 +66,7 @@ export class RegisterPage extends React.Component {
 
           <Form.Item
             label="Last Name"
-            name="lastname"
+            name="last_name"
             rules={[{ required: true, message: 'Please input your last name!' }]}
           >
             <Input />
@@ -76,3 +90,7 @@ export class RegisterPage extends React.Component {
     );
   }
 }
+
+const RegisterPageWithRouter = withRouter(RegisterPageNoRouter);
+
+export { RegisterPageWithRouter as RegisterPage }

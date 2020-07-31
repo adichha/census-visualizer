@@ -9,9 +9,12 @@ const appLoadRoutine = [
     if (storageValue === null) {
       return
     }
-    const token = storageValue
-    UserStore.authToken = token
-    UserStore.fetchUser(token)
+    const obj = JSON.parse(storageValue)
+    UserStore.authToken = obj.token
+    UserStore.userInfo = {
+      firstName: obj.firstName,
+      lastName: obj.lastName
+    }
   },
 ]
 
@@ -25,7 +28,7 @@ class PersistenceStore {
   }
 
   setItem(key, data) {
-    localStorage.setItem(key.valueOf(), data)
+    localStorage.setItem(key.valueOf(), JSON.stringify(data))
   }
 
   clearItem(key) {
