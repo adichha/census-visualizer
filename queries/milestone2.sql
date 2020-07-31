@@ -19,13 +19,13 @@ IGNORE 1 LINES
 (geocode, geoname);
 
 Creating new users:
-INSERT INTO user_profiles VALUES (username, first_name, last_name, password_hash, salt);
+INSERT INTO user_profiles VALUES (username, firstName, lastName, password_hash, salt);
 
 Checking for logged in users:
 SELECT * FROM login_tokens t INNER JOIN user_profiles u ON u.username = t.username WHERE t.token = $token;
 
 Finding profiles by name:
-SELECT * FROM user_profiles WHERE visibility = ‘public’ AND (username LIKE (‘%’ + @input ‘%’) OR first_name LIKE (‘%’ + @input ‘%’) OR last_name LIKE (‘%’ + @input ‘%’)) LIMIT 25 ORDER BY username DESC;
+SELECT * FROM user_profiles WHERE visibility = ‘public’ AND (username LIKE (‘%’ + @input ‘%’) OR firstName LIKE (‘%’ + @input ‘%’) OR lastName LIKE (‘%’ + @input ‘%’)) LIMIT 25 ORDER BY username DESC;
 
 
 Rest of the queries are pretty trivial (inserting into relations, etc.)
