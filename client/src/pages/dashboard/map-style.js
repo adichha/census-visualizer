@@ -5,7 +5,7 @@ export const heatmapLayer = {
   type: 'heatmap',
   paint: {
     // Increase the heatmap weight based on frequency and property magnitude
-    'heatmap-weight': ['interpolate', ['linear'], ['get', 'mag'], 0, 0, 6, 1],
+    'heatmap-weight': ['interpolate', ['linear'], ['get', 'mag'], 0, 0, 100000, 1],
     // Increase the heatmap color weight weight by zoom level
     // heatmap-intensity is a multiplier on top of heatmap-weight
     'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, MAX_ZOOM_LEVEL, 3],

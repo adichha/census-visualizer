@@ -6,13 +6,16 @@ import { List, Switch as Toggle, Layout, Typography, Button, Checkbox } from 'an
 import {
   PlusOutlined,
   DeleteOutlined,
-  EditOutlined
+  EditOutlined,
+  SearchOutlined
 } from '@ant-design/icons'
 import { CreateSearchQueryModal } from './modal/CreateSearchQueryModal';
 import { queries } from '@testing-library/react';
 import { Api } from '../../network/api/Api';
+import './app.css';
 const { Sider, Content } = Layout;
 const { Title } = Typography;
+
 
 
 function filterFeaturesByDay(featureCollection, time) {
@@ -157,7 +160,8 @@ export class Map extends Component {
       mapStyle: "mapbox://styles/mapbox/light-v9",
       isShowFirstLayer: true,
       isShowSecondLayer: false,
-      queries: []
+      queries: [],
+      queryResults: []
     };
   }
 
@@ -278,6 +282,8 @@ export class Map extends Component {
     }
     console.log(apiQuery);
     let data = await Api.saveQuery(apiQuery);
+    console.log("daokdaodka");
+    console.log(data);
     return data;
   }
 
@@ -302,13 +308,38 @@ export class Map extends Component {
     await Api.deleteQueries(qids);
   }
 
-  toggleQuerySelected = (query) => {
-    const index = this.queryExists(query, -1);
-    if (index >= 0) {
-      const queries = this.state.queries;
-      queries[index].selected = !queries[index].selected;
-      this.setState({ queries: queries });
+  async runQueries(){
+    this.setState({queryResults: []});
+    const queries = this.state.queries;
+    const queriesToRun = [];
+    let size = queries.length;
+    for (let i = 0; i < size; ++i) {
+      if (queries[i].selected) {
+        console.log(queries[i].query.qid);
+        queriesToRun.push(queries[i].query.qid);
+      }
     }
+    console.log("run queries");
+    console.log(queriesToRun);
+    const result = await Api.runQueries(queriesToRun);
+    result[0].selected = true;
+    for(let i = 1; i < result.length; ++i){
+      result[i].selected = false;
+    }
+    console.log(result)
+    this.setState({queryResults: result});
+  }
+
+  toggleQuerySelected = (index) => {
+    const queries = this.state.queries;
+    queries[index].selected = !queries[index].selected;
+    this.setState({ queries: queries });
+  }
+
+  toggleResultSelected = (index) => {
+    const result = this.state.queryResults;
+    result[index].selected = !result[index].selected;
+    this.setState({ queryResults: result });
   }
 
   toggleIsShowFirstLayer = checked => {
@@ -400,27 +431,9 @@ export class Map extends Component {
     this.setState({ viewport: etc })
   }
 
-  _handleChangeDay = time => {
-    this.setState({ selectedTime: time });
-    if (this.state.earthquakes) {
-      this.setState({ data: filterFeaturesByDay(this.state.earthquakes, time) });
-    }
-  };
-
-  _handleChangeAllDay = allDay => {
-    this.setState({ allDay });
-    if (this.state.earthquakes) {
-      this.setState({
-        data: allDay
-          ? this.state.earthquakes
-          : filterFeaturesByDay(this.state.earthquakes, this.state.selectedTime)
-      });
-    }
-  };
-
   // TODO : execute
   // query (POST)
-  // user/query 
+  // user/query_by_id 
   // pass in by qid (array) -> list 
   // returns a geojson 
 
@@ -428,6 +441,8 @@ export class Map extends Component {
   // find profiles
   // add friends
   // list friends
+
+  // TODO : user profile page
 
   render() {
     const { viewport, data, allDay, selectedTime, startTime, endTime, mapStyle, isShowFirstLayer, isShowSecondLayer } = this.state;
@@ -491,6 +506,7 @@ export class Map extends Component {
             <Title level={3}>Query Builder</Title>
             <Button type="dashed" onClick={() => this.setState({ modalVisible: true })} icon={<PlusOutlined />} />
             <Button type="dashed" disabled={!this.querySelected()} onClick={() => this.deleteQueries()} icon={<DeleteOutlined />} />
+            <Button type="dashed" disabled={!this.querySelected()} onClick={() => this.runQueries()} icon={<SearchOutlined />} />
             <br />
           </div>
           <List>
@@ -522,7 +538,7 @@ export class Map extends Component {
                 }}
                 query={query.query}
               ></CreateSearchQueryModal>
-                <List.Item><Checkbox checked={query.selected} onChange={() => this.toggleQuerySelected(query)}>{this.buildQuery(query.query)}</Checkbox>
+                <List.Item><Checkbox checked={query.selected} onChange={() => this.toggleQuerySelected(index)}>{this.buildQuery(query.query)}</Checkbox>
                   <Button type="dashed" onClick={() => this.toggleModalVisible(index)} icon={<EditOutlined />} />
                 </List.Item></div>
             })}
@@ -539,20 +555,27 @@ export class Map extends Component {
                 onViewportChange={viewport => this.onViewportChange(viewport)}
                 mapboxApiAccessToken='pk.eyJ1IjoidHBpbnRvNyIsImEiOiJja2JicWYwMzkwM3NnMnNtZnZkbXU5dGhkIn0.NdzHwoMYvZ-fSTIA9xXXfw'
               >
+              {this.state.queryResults.map((result) => (
+                result.selected && (
+                <Source type="geojson" data={result}>
+                {/* ... passes in the key value pairs as props to Layer */}
+                <Layer visible={result.selected} {...heatmapLayer} />
+                {/* <Layer {...heatmapLayer2} /> */}
+              </Source>)
+              ))}  
 
-                {isShowFirstLayer && isShowSecondLayer && data && (<Source type="geojson" data={data}>
-                  {/* ... passes in the key value pairs as props to Layer */}
-                  <Layer {...heatmapLayer} />
-                  {/* <Layer {...heatmapLayer2} /> */}
-                </Source>) ||
-                  isShowFirstLayer && data && (<Source type="geojson" data={data}>
-                    <Layer {...heatmapLayer} />
-                  </Source>) ||
-                  isShowSecondLayer && data && (<Source type="geojson" data={data}>
-                    {/* <Layer {...heatmapLayer2} /> */}
-                  </Source>)
-                }
               </ReactMapGL>
+              <div className="control-panel">
+        <h3>Heatmap</h3>
+      
+        <hr />
+        {this.state.queryResults.map((result, index) => {
+        return <div>Test test
+        <Checkbox checked={result.selected} onChange={() => this.toggleResultSelected(index)}>{}
+          {/* TODO: what should be printed here (entire query is too long, maybe qid?) */}
+        </Checkbox></div>
+      })}
+      </div>
             </div>
           </Content>
         </Layout >

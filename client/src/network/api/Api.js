@@ -53,4 +53,9 @@ export class Api {
   static deleteQueries = async (payload) => {
     await Api.createRequest('user/delete_queries', 'POST', payload);
   }
+
+  static runQueries = async (payload) => {
+    const data = await Api.createRequest('user/query_by_id', 'POST', payload);
+    return data;
+  }
 }
