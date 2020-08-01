@@ -21,8 +21,9 @@ LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (geocode, geoname);
 
--- Query to create a new user
-INSERT INTO user_profiles VALUES (username, first_name, last_name, password_hash, salt);
+
+-- Creating new users:
+INSERT INTO user_profiles VALUES (username, firstName, lastName, password_hash, salt);
 
 -- Query to check where users that are logged in
 -- Enables authentication check for security purposes

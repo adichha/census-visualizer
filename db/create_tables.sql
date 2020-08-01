@@ -6,8 +6,8 @@ CREATE TABLE user_profiles
 (
 	uid INT AUTO_INCREMENT PRIMARY KEY,
 	username VARCHAR(32) NOT NULL UNIQUE,
-	first_name VARCHAR(32) NOT NULL,
-	last_name VARCHAR(32) NOT NULL,
+	firstName VARCHAR(32) NOT NULL,
+	lastName VARCHAR(32) NOT NULL,
 	password_hash VARCHAR(100) NOT NULL,
 	salt CHAR(16) NOT NULL,
 	num_queries INT NOT NULL DEFAULT 0
@@ -145,6 +145,30 @@ CREATE TABLE population
     FOREIGN KEY (age) REFERENCES age_range_lut(id),
     FOREIGN KEY (sex) REFERENCES sex_lut(id),
     FOREIGN KEY (region) REFERENCES country_codes_lut(code)
+);
+
+# User friends relation
+create table user_friends
+(
+    follower int not null,
+    followee int not null,
+    primary key(followee, follower),
+    constraint user_friends_user_profiles_uid_fk
+        foreign key (follower) references user_profiles (uid),
+    constraint user_friends_user_profiles_uid_fk_2
+        foreign key (followee) references user_profiles (uid)
+);
+
+# Shared queries relation
+create table shared_queries
+(
+    qid int not null,
+    uid int not null,
+    primary key(qid, uid),
+    constraint shared_queries_saved_queries_qid_fk
+        foreign key (qid) references saved_queries (qid),
+    constraint shared_queries_user_profiles_uid_fk
+        foreign key (uid) references user_profiles (uid)
 );
 
 # No need to create manual indices; the above tables
