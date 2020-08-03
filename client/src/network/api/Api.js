@@ -21,7 +21,6 @@ export class Api {
           },
           data: payload || {},
         })
-        console.log(response);
         resolve(response.data)
       } catch (e) {
         const {
@@ -56,6 +55,16 @@ export class Api {
 
   static runQueries = async (payload) => {
     const data = await Api.createRequest('user/query_by_id', 'POST', payload);
+    return data;
+  }
+
+  static getUserMe = async (payload) => {
+    const data = await await Api.createRequest('user/me', 'GET', payload);
+    return data;
+  }
+
+  static updateDarkMode = async (payload) => {
+    const data = await await Api.createRequest('user/dark_mode', 'POST', payload);
     return data;
   }
 }

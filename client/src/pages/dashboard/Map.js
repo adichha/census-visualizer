@@ -17,23 +17,6 @@ const { Sider, Content } = Layout;
 const { Title } = Typography;
 
 
-
-function filterFeaturesByDay(featureCollection, time) {
-  const date = new Date(time);
-  const year = date.getFullYear();
-  const month = date.getMonth();
-  const day = date.getDate();
-  const features = featureCollection.features.filter(feature => {
-    const featureDate = new Date(feature.properties.time);
-    return (
-      featureDate.getFullYear() === year &&
-      featureDate.getMonth() === month &&
-      featureDate.getDate() === day
-    );
-  });
-  return { type: 'FeatureCollection', features };
-}
-
 const educationLUT = {
   1: "total education",
   2: "no certificate, diploma or degree",
@@ -157,7 +140,7 @@ export class Map extends Component {
       selectedTime: current,
       modalVisible: false,
       earthquakes: null,
-      mapStyle: "mapbox://styles/mapbox/light-v9",
+      mapStyle: "",
       isShowFirstLayer: true,
       isShowSecondLayer: false,
       queries: [],
@@ -166,26 +149,19 @@ export class Map extends Component {
   }
 
   componentDidMount() {
-    requestJson(
-      'https://api.jsonbin.io/b/5f0baf3f5d4af74b012b5873',
-      (error, response) => {
-        if (!error) {
-          const features = response[0].features;
-          // const endTime = features[0].properties.time;
-          // const startTime = features[features.length - 1].properties.time;
-
-          this.setState({
-            data: response[0],
-            earthquakes: response[0],
-            // endTime,
-            // startTime,
-            // selectedTime: endTime
-          });
-        }
-      }
-    );
     this.fetchData();
+    this.setMapStyle();
+  }
 
+  async setMapStyle() {
+    // TODO: when API is up
+    // const userInfo = await Api.getUserMe();
+    const userInfo = {dark_mode: true};
+    if (userInfo && userInfo.dark_mode) {
+      this.setState({ mapStyle: "mapbox://styles/mapbox/dark-v9" })
+    } else {
+      this.setState({ mapStyle: "mapbox://styles/mapbox/light-v9" })
+    }
   }
 
   async fetchData() {
@@ -213,11 +189,13 @@ export class Map extends Component {
           }
         }
       }
-      sex = apiQuery.sex ? [sexLUT[apiQuery.sex]] : ["male", "female"];
+      sex = apiQuery.sex && apiQuery.sex !== 1 ? [sexLUT[apiQuery.sex]] : ["male", "female"];
       // TODO: i should not be storing malefemale 
       if(apiQuery.age){
         for(let j = 0; j < apiQuery.age.length; ++j){
-          age.push(ageLUT[apiQuery.age[j]]);
+          if(apiQuery.age[j] !== 1){
+            age.push(ageLUT[apiQuery.age[j]]);
+          }
         }
       }
       // TODO: need to fix age in query builder
@@ -239,6 +217,25 @@ export class Map extends Component {
     }
     this.setState({ queries: queries });
     console.log(this.state.queries);
+  }
+
+  async addQueryToBuilder(values){
+    const oldQueries = this.state.queries;
+    const query = {
+      "query": values,
+      "selected": false,
+      "modalVisible": false
+    };
+    if (this.queryExists(query, -1) === -1) {
+      // need to save query id
+      const qid = await this.saveQuery(query.query);
+      query.query.qid = qid[0];
+      oldQueries.push(query);
+    }
+    this.setState({
+      modalVisible: false,
+      queries: oldQueries
+    })
   }
 
   async saveQuery(query){
@@ -476,21 +473,8 @@ export class Map extends Component {
               values.sex = ["male", "female"];
             }
             console.log(values);
-            const oldQueries = this.state.queries;
-            const query = {
-              "query": values,
-              "selected": false,
-              "modalVisible": false
-            };
-            if (this.queryExists(query, -1) === -1) {
-              // need to save query id
-              query.query.qid = this.saveQuery(query.query);
-              oldQueries.push(query);
-            }
-            this.setState({
-              modalVisible: false,
-              queries: oldQueries
-            })
+            this.addQueryToBuilder(values);
+
           }}
           onCancel={() => {
             this.setState({
@@ -559,7 +543,7 @@ export class Map extends Component {
                 result.selected && (
                 <Source type="geojson" data={result}>
                 {/* ... passes in the key value pairs as props to Layer */}
-                <Layer visible={result.selected} {...heatmapLayer} />
+                <Layer {...heatmapLayer} />
                 {/* <Layer {...heatmapLayer2} /> */}
               </Source>)
               ))}  
