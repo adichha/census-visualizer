@@ -2,7 +2,8 @@ import React from 'react';
 import { Layout, Menu } from 'antd';
 import {
   PieChartOutlined,
-  SettingOutlined
+  SettingOutlined,
+  UsergroupAddOutlined
 } from '@ant-design/icons';
 import {
   Link
@@ -13,9 +14,8 @@ import {
 } from '@ant-design/icons';
 import { Map } from './Map';
 import { Settings } from './Settings';
+import { FriendsPage } from '../friends/FriendsPage'
 
-
-import { Api } from '../../network/api/Api';
 
 const { Sider } = Layout;
 
@@ -26,7 +26,7 @@ function onChange(e) {
 export class Dashboard extends React.Component {
   state = {
     collapsed: false,
-    displayMap: true,
+    page: 1,
   };
 
   onCollapse = collapsed => {
@@ -44,13 +44,16 @@ export class Dashboard extends React.Component {
         <Sider collapsible collapsed={this.state.collapsed} onCollapse={this.onCollapse}>
           <div className="logo" />
           <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline">
-            <Menu.Item key="1" icon={<PieChartOutlined />} onClick={() => this.setState({displayMap : true})}>
+            <Menu.Item key="1" icon={<PieChartOutlined />} onClick={() => this.setState({ page: 0 })}>
               Visualization
             </Menu.Item>
-            <Menu.Item key="2" icon={<SettingOutlined />} onClick={() => this.setState({displayMap : false})}>
-                Account Settings
+            <Menu.Item key="2" icon={<UsergroupAddOutlined />} onClick={() => this.setState({ page: 1 })}>
+              Friends
             </Menu.Item>
-            <Menu.Item key="3" icon={<LoginOutlined />}>
+            <Menu.Item key="3" icon={<SettingOutlined />} onClick={() => this.setState({ page: 2 })}>
+              Account Settings
+            </Menu.Item>
+            <Menu.Item key="4" icon={<LoginOutlined />}>
               <Link to='/'>
                 Log out
             </Link>
@@ -59,11 +62,9 @@ export class Dashboard extends React.Component {
         </Sider>
         <Layout className="site-layout">
           <div style={{ height: '100%', position: 'relative' }}>
-            {this.state.displayMap ?
-             <Map /> : 
-             <Settings />
-            }
-            
+            {this.state.page === 0 && <Map />}
+            {this.state.page === 1 && <FriendsPage />}
+            {this.state.page === 2 && <Settings />}
           </div>
         </Layout>
       </Layout>

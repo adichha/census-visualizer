@@ -67,4 +67,19 @@ export class Api {
     const data = await await Api.createRequest('user/dark_mode', 'POST', payload);
     return data;
   }
+
+  static searchFriend = async (payload) => {
+    const data = await await Api.createRequest(`user/find_profiles?input=${payload}`, 'GET', payload);
+    return data;
+  }
+
+  static addFriend = async (payload) => {
+    const data = await await Api.createRequest(`user/friends`, 'POST', payload);
+    return data;
+  }
+
+  static fetchFriends = async () => {
+    const data = await Api.createRequest(`user/friends`, 'GET');
+    return data;
+  }
 }
