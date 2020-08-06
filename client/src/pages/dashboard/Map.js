@@ -451,9 +451,57 @@ export class Map extends Component {
     this.setState({ viewport: etc })
   }
 
-  render() {
-    const { mapStyle} = this.state;
+  // TODO : execute
+  // query (POST)
+  // user/query_by_id 
+  // pass in by qid (array) -> list 
+  // returns a geojson 
 
+  // TODO : friends pages
+  // find profiles
+  // add friends
+  // list friends
+
+  // TODO : user profile page
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if(this.state.queryResults) {
+      var anyUpdated = false;
+      let q = this.state.queryResults;
+      for(var i = 0; i < q.length; i ++) {
+        if(q[i].postSelect) {
+          anyUpdated = true;
+          q[i].selected = true;
+          q[i].postSelect = false;
+        }
+      }
+      if(anyUpdated)
+        this.setState({queryResults: q});
+    }
+  }
+
+  render() {
+    const { viewport, data, allDay, selectedTime, startTime, endTime, mapStyle, isShowFirstLayer, isShowSecondLayer } = this.state;
+
+
+    let heatmapLayer2 = heatmapLayer
+    // heatmapLayer2.paint["heatmap-color"] = [
+    //   'interpolate',
+    //   ['linear'],
+    //   ['heatmap-density'],
+    //   0,
+    //   'rgba(33,102,172,0)',
+    //   0.2,
+    //   'rgb(11, 64, 8)',
+    //   0.4,
+    //   'rgb(29, 89, 25)',
+    //   0.6,
+    //   'rgb(34, 181, 24)',
+    //   0.8,
+    //   'rgb(111, 217, 104)',
+    //   0.9,
+    //   'rgb(165, 230, 161)'
+    // ]
     return (
       <Layout style={{ minHeight: '100%' }}>
         <CreateSearchQueryModal
@@ -545,8 +593,9 @@ export class Map extends Component {
                 <hr />
                 {this.state.queryResults.map((result, index) => {
                   return <div>
-          <Checkbox checked={result.selected} onChange={() => this.toggleResultSelected(index)}>{}
-                    </Checkbox> {result.qid} </div> 
+                    <Checkbox checked={result.selected} onChange={() => this.toggleResultSelected(index)}>
+                    </Checkbox> Query {result.qid}
+                  </div>
                 })}
               </div>
               <div className="map-legends">

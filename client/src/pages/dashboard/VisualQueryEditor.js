@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './editor.css';
 import BezierEditor from "bezier-easing-editor";
 import {Button, Radio, Select} from "antd";
+import {UserStore} from "../../stores/UserStore";
 
 export class VisualQueryEditor extends Component {
 
@@ -111,6 +112,8 @@ export class VisualQueryEditor extends Component {
             let q = this.props.queries;
             let index = q.findIndex((e) => e.qid === this.state.selected);
             q[index].heatmap.paint["heatmap-color"] = this.makeNewColors(this.colors[parseInt(colorIndex)]);
+            q[index].selected = false;
+            q[index].postSelect = true;
             this.props.onChange(q);
         }
     };
@@ -130,7 +133,8 @@ export class VisualQueryEditor extends Component {
             const weight = ["interpolate", ["cubic-bezier", max(curve[0], 0), max(curve[1], 0), min(curve[2], 1), min(curve[3], 1)], ["get", "mag"], 0, 0, mag, 1];
 
             q[index].heatmap.paint["heatmap-weight"] = weight;
-
+            q[index].selected = false;
+            q[index].postSelect = true;
             this.props.onChange(q);
         }
 
@@ -142,7 +146,7 @@ export class VisualQueryEditor extends Component {
 
     save = () => {
         if(this.state.selected) {
-
+            // TODO: save
         }
     };
 
