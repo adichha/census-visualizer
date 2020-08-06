@@ -10,26 +10,12 @@ export class Legend extends React.Component {
             entries.push(i);
         }
         console.log(entries)
-        // return (
-        //     <div id="state-legend" class="legend">
-        //         <h4><span style={{backgroundColor: "#723122"}}></span>Population</h4>
-        //         <div><span style={{backgroundColor: "#723122"}}></span>25,000,000</div>
-        //         <div><span style={{backgroundColor: "#723122"}}></span>10,000,000</div>
-        //         <div><span style={{backgroundColor: "#723122"}}></span>7,500,000</div>
-        //         <div><span style={{backgroundColor: "#723122"}}></span>5,000,000</div>
-        //         <div><span style={{backgroundColor: "#723122"}}></span>2,500,000</div>
-        //         <div><span style={{backgroundColor: "#723122"}}></span>1,000,000</div>
-        //         <div><span style={{backgroundColor: "#723122"}}></span>750,000</div>
-        //         <div><span style={{backgroundColor: "#723122"}}></span>500,000</div>
-        //         <div>0</div>
-        //     </div>
-        // )
         return (
         <div>
-            <h4><span style={{backgroundColor: "#723122"}}></span>Population</h4>
+            <h4><span style={{backgroundColor: color}}></span>Population</h4>
             <div id="state-legend" class="legend">
-                {entries.map((idx) => (
-                    <h4><span style={{backgroundColor: "#723122"}}></span>{idx}</h4>
+                {entries.map((value, idx) => (
+                    <h4><span style={{backgroundColor: color, opacity: (entries.length - idx)/entries.length}}></span>{value}</h4>
                 ))}
             </div>
             </div>
