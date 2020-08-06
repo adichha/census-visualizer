@@ -60,7 +60,7 @@ const incomeLUT = {
 
 const incomeLUTReverse = {
   "total income": 1,
-  "market income" : 2,
+  "market income": 2,
   "employment income": 3,
   "wages, salaries and commissions": 4,
   "net self-employment income": 5,
@@ -84,7 +84,7 @@ const sexLUT = {
 };
 
 const sexLUTReverse = {
-  "malefemale" : 1,
+  "malefemale": 1,
   "male": 2,
   "female": 3
 };
@@ -93,7 +93,7 @@ const ageLUT = {
   1: "all", // probably don't need
   2: "15-24",
   3: "25-34",
-  4: "35-44", 
+  4: "35-44",
   5: "45-54",
   6: "55-64",
   7: "65+"
@@ -103,7 +103,7 @@ const ageLUTReverse = {
   "all": 1,
   "15-24": 2,
   "25-34": 3,
-  "35-44": 4, 
+  "35-44": 4,
   "45-54": 5,
   "55-64": 6,
   "65+": 7
@@ -187,12 +187,12 @@ export class FriendsPage extends React.Component {
     })
   }
 
-  async shareQueries(){
+  async shareQueries() {
     const queries = this.state.queries;
     const username = this.state.modalUsername;
     const req = [];
-    for(let i = 0; i < queries.length; ++i){
-      if(queries[i].selected){
+    for (let i = 0; i < queries.length; ++i) {
+      if (queries[i].selected) {
         const shareQuery = {
           qid: queries[i].qid,
           username: username
@@ -202,37 +202,37 @@ export class FriendsPage extends React.Component {
     }
     console.log(req)
     await Api.shareQueries(req);
-    this.setState({ showModal: false, modalUsername: '', queries: []})
+    this.setState({ showModal: false, modalUsername: '', queries: [] })
   }
 
-  async getUserQueries(username){
+  async getUserQueries(username) {
     const apiQueries = await Api.getFriendQueries(username)
 
     let queries = [];
-    for(let i = 0; i < apiQueries.length; ++i){
+    for (let i = 0; i < apiQueries.length; ++i) {
       // note: need to deal w query exists?
       const apiQuery = apiQueries[i];
       const education = [];
       const income = [];
       let sex = [];
       const age = [];
-      if(!(apiQuery.params.length == 1 && apiQuery.params[0] == 1)){
-        if(apiQuery.dataset === "education"){
+      if (!(apiQuery.params.length == 1 && apiQuery.params[0] == 1)) {
+        if (apiQuery.dataset === "education") {
 
-          for(let j = 0; j < apiQuery.params.length; ++j){
+          for (let j = 0; j < apiQuery.params.length; ++j) {
             education.push(educationLUT[apiQuery.params[j]]);
           }
-        } else if(apiQuery.dataset === "employment"){
-          for(let j = 0; j < apiQuery.params.length; ++j){
+        } else if (apiQuery.dataset === "employment") {
+          for (let j = 0; j < apiQuery.params.length; ++j) {
             income.push(incomeLUT[apiQuery.params[j]]);
           }
         }
       }
       sex = apiQuery.sex && apiQuery.sex !== 1 ? [sexLUT[apiQuery.sex]] : ["male", "female"];
       // TODO: i should not be storing malefemale 
-      if(apiQuery.age){
-        for(let j = 0; j < apiQuery.age.length; ++j){
-          if(apiQuery.age[j] !== 1){
+      if (apiQuery.age) {
+        for (let j = 0; j < apiQuery.age.length; ++j) {
+          if (apiQuery.age[j] !== 1) {
             age.push(ageLUT[apiQuery.age[j]]);
           }
         }
@@ -241,8 +241,8 @@ export class FriendsPage extends React.Component {
         qid: apiQuery.qid,
         database: apiQuery.dataset,
         education: education,
-        income: income, 
-        sex: sex, 
+        income: income,
+        sex: sex,
         age: age,
         selected: false
       };
@@ -255,7 +255,7 @@ export class FriendsPage extends React.Component {
   }
 
   buildQuery = query => {
-    if(query !== undefined){
+    if (query !== undefined) {
       const { database, age, sex, income, education } = query;
       let str = "";
       str += `Showing`;
@@ -274,7 +274,7 @@ export class FriendsPage extends React.Component {
       }
       str += ` from ${database}`;
       if (sex) {
-        if(sex.length == 0){
+        if (sex.length == 0) {
           // TODO: add to male/female?
         }
         str += ` where sex is `;
@@ -300,7 +300,7 @@ export class FriendsPage extends React.Component {
       str += ` ${array[i]}`;
       if (i < array.length - 1) str += `,`;
     }
-    return str; 
+    return str;
   }
 
   render() {
@@ -309,7 +309,7 @@ export class FriendsPage extends React.Component {
       const username = data.split(":")[0];
       await Api.addFriend([username]);
       this.setState({
-        friends: [...this.state.friends, username],
+        friends: [...this.state.friends, { username }],
         value: '',
       })
       message.success(`Successfully added ${username}`)
@@ -371,11 +371,11 @@ export class FriendsPage extends React.Component {
         >
           <Table columns={this.queryColumns} dataSource={this.state.queries.map((query, i) => {
             return {
-              id: i, 
+              id: i,
               query: query
             }
-          })}/>
-        
+          })} />
+
         </Modal>
       </div >
     );
