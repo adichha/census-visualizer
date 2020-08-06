@@ -74,7 +74,7 @@ const incomeLUT = {
 
 const incomeLUTReverse = {
   "total income": 1,
-  "market income" : 2,
+  "market income": 2,
   "employment income": 3,
   "wages, salaries and commissions": 4,
   "net self-employment income": 5,
@@ -98,7 +98,7 @@ const sexLUT = {
 };
 
 const sexLUTReverse = {
-  "malefemale" : 1,
+  "malefemale": 1,
   "male": 2,
   "female": 3
 };
@@ -107,7 +107,7 @@ const ageLUT = {
   1: "all", // probably don't need
   2: "15-24",
   3: "25-34",
-  4: "35-44", 
+  4: "35-44",
   5: "45-54",
   6: "55-64",
   7: "65+"
@@ -117,7 +117,7 @@ const ageLUTReverse = {
   "all": 1,
   "15-24": 2,
   "25-34": 3,
-  "35-44": 4, 
+  "35-44": 4,
   "45-54": 5,
   "55-64": 6,
   "65+": 7
@@ -146,7 +146,8 @@ export class Map extends Component {
       isShowSecondLayer: false,
       queries: [],
       sharedQueries: [],
-      queryResults: []
+      queryResults: [],
+      isLoading: false,
     };
   }
 
@@ -177,30 +178,30 @@ export class Map extends Component {
     // @TODO: Tyler: transform the return type from queries
     // into this.setState({ queries ....... })...
     let queries = [];
-    for(let i = 0; i < apiQueries.length; ++i){
+    for (let i = 0; i < apiQueries.length; ++i) {
       // note: need to deal w query exists?
       const apiQuery = apiQueries[i];
       const education = [];
       const income = [];
       let sex = [];
       const age = [];
-      if(!(apiQuery.params.length == 1 && apiQuery.params[0] == 1)){
-        if(apiQuery.dataset === "education"){
+      if (!(apiQuery.params.length == 1 && apiQuery.params[0] == 1)) {
+        if (apiQuery.dataset === "education") {
 
-          for(let j = 0; j < apiQuery.params.length; ++j){
+          for (let j = 0; j < apiQuery.params.length; ++j) {
             education.push(educationLUT[apiQuery.params[j]]);
           }
-        } else if(apiQuery.dataset === "employment"){
-          for(let j = 0; j < apiQuery.params.length; ++j){
+        } else if (apiQuery.dataset === "employment") {
+          for (let j = 0; j < apiQuery.params.length; ++j) {
             income.push(incomeLUT[apiQuery.params[j]]);
           }
         }
       }
       sex = apiQuery.sex && apiQuery.sex !== 1 ? [sexLUT[apiQuery.sex]] : ["male", "female"];
       // TODO: i should not be storing malefemale 
-      if(apiQuery.age){
-        for(let j = 0; j < apiQuery.age.length; ++j){
-          if(apiQuery.age[j] !== 1){
+      if (apiQuery.age) {
+        for (let j = 0; j < apiQuery.age.length; ++j) {
+          if (apiQuery.age[j] !== 1) {
             age.push(ageLUT[apiQuery.age[j]]);
           }
         }
@@ -210,8 +211,8 @@ export class Map extends Component {
         qid: apiQuery.qid,
         database: apiQuery.dataset,
         education: education,
-        income: income, 
-        sex: sex, 
+        income: income,
+        sex: sex,
         age: age
       };
       const queryWrapper = {
@@ -219,14 +220,14 @@ export class Map extends Component {
         "selected": false,
         "modalVisible": false
       };
-      
+
       queries.push(queryWrapper);
     }
     this.setState({ queries: queries });
     console.log(this.state.queries);
   }
 
-  async addQueryToBuilder(values){
+  async addQueryToBuilder(values) {
     const oldQueries = this.state.queries;
     const query = {
       "query": values,
@@ -245,22 +246,22 @@ export class Map extends Component {
     })
   }
 
-  async saveQuery(query){
+  async saveQuery(query) {
     const params = [];
     // TODO: if all length or none, do total. 
-    if(query.database === "education"){
-      if(!query.education || query.education.length == 0  || query.education.length == 14){
+    if (query.database === "education") {
+      if (!query.education || query.education.length == 0 || query.education.length == 14) {
         params.push(1);
-      } else{
-        for(let i = 0; i < query.education.length; ++i){
+      } else {
+        for (let i = 0; i < query.education.length; ++i) {
           params.push(educationLUTReverse[query.education[i]]);
         }
       }
-    } else if(query.database === "employment"){
-      if(!query.income || query.income.length == 0  || query.income.length == 14){
+    } else if (query.database === "employment") {
+      if (!query.income || query.income.length == 0 || query.income.length == 14) {
         params.push(1);
-      } else{
-        for(let i = 0; i < query.income.length; ++i){
+      } else {
+        for (let i = 0; i < query.income.length; ++i) {
           params.push(incomeLUTReverse[query.income[i]]);
         }
       }
@@ -269,19 +270,19 @@ export class Map extends Component {
       "dataset": query.database,
       "params": params,
     }];
-    if(query.age && query.age.length > 1){
+    if (query.age && query.age.length > 1) {
       const age = [];
-      for(let i = 0; i < query.age.length; ++i){
+      for (let i = 0; i < query.age.length; ++i) {
         age.push(ageLUTReverse[query.age[i]]);
       }
       apiQuery[0].age = age;
     }
     else apiQuery[0].age = [1];
-    if(query.sex && query.sex.length == 1){
+    if (query.sex && query.sex.length == 1) {
       apiQuery[0].sex = sexLUTReverse[query.sex[0]];
     } else apiQuery[0].sex = 1;
     console.log(query);
-    if(query.qid){
+    if (query.qid) {
       apiQuery[0].qid = query.qid;
     }
     console.log(apiQuery);
@@ -291,7 +292,7 @@ export class Map extends Component {
     return data;
   }
 
-  async deleteQueries(){
+  async deleteQueries() {
     const queries = this.state.queries;
     const queriesToDelete = [];
     let size = queries.length;
@@ -307,13 +308,13 @@ export class Map extends Component {
     await this.deleteQueriesAPI(queriesToDelete);
   }
 
-  async deleteQueriesAPI(qids){
+  async deleteQueriesAPI(qids) {
     console.log(qids);
     await Api.deleteQueries(qids);
   }
 
-  async runQueries(){
-    this.setState({queryResults: []});
+  async runQueries() {
+    this.setState({ queryResults: [], isLoading: true });
     const queries = this.state.queries;
     const queriesToRun = [];
     let size = queries.length;
@@ -323,16 +324,12 @@ export class Map extends Component {
         queriesToRun.push(queries[i].query.qid);
       }
     }
-    console.log("run queries");
-    console.log(queriesToRun);
     const result = await Api.runQueries(queriesToRun);
-    console.log(result);
     result[0].selected = true;
-    for(let i = 1; i < result.length; ++i){
+    for (let i = 1; i < result.length; ++i) {
       result[i].selected = false;
     }
-    console.log(result);
-    this.setState({queryResults: result});
+    this.setState({ queryResults: result, isLoading: false });
   }
 
   toggleQuerySelected = (index) => {
@@ -388,11 +385,11 @@ export class Map extends Component {
       str += ` ${array[i]}`;
       if (i < array.length - 1) str += `,`;
     }
-    return str; 
+    return str;
   }
 
   buildQuery = query => {
-    if(query !== undefined){
+    if (query !== undefined) {
       const { database, age, sex, income, education } = query;
       let str = "";
       str += `Showing`;
@@ -411,7 +408,7 @@ export class Map extends Component {
       }
       str += ` from ${database}`;
       if (sex) {
-        if(sex.length == 0){
+        if (sex.length == 0) {
           // TODO: add to male/female?
         }
         str += ` where sex is `;
@@ -477,7 +474,7 @@ export class Map extends Component {
           visible={this.state.modalVisible}
           onCreate={(values) => {
             // default no sexes to both sexes
-            if(typeof values.sex != 'undefined' && values.sex.length == 0){
+            if (typeof values.sex != 'undefined' && values.sex.length == 0) {
               values.sex = ["male", "female"];
             }
             console.log(values);
@@ -498,7 +495,7 @@ export class Map extends Component {
             <Title level={3}>Query Builder</Title>
             <Button type="dashed" onClick={() => this.setState({ modalVisible: true })} icon={<PlusOutlined />} />
             <Button type="dashed" disabled={!this.querySelected()} onClick={() => this.deleteQueries()} icon={<DeleteOutlined />} />
-            <Button type="dashed" disabled={!this.querySelected()} onClick={() => this.runQueries()} icon={<SearchOutlined />} />
+            <Button type="dashed" loading={this.state.isLoading} disabled={!this.querySelected()} onClick={() => this.runQueries()} icon={<SearchOutlined />} />
             <br />
           </div>
           <List>
@@ -581,27 +578,27 @@ export class Map extends Component {
                 onViewportChange={viewport => this.onViewportChange(viewport)}
                 mapboxApiAccessToken='pk.eyJ1IjoidHBpbnRvNyIsImEiOiJja2JicWYwMzkwM3NnMnNtZnZkbXU5dGhkIn0.NdzHwoMYvZ-fSTIA9xXXfw'
               >
-              {this.state.queryResults.map((result) => (
-                result.selected && (
-                <Source type="geojson" data={result.layer}>
-                {/* ... passes in the key value pairs as props to Layer */}
-                <Layer {...result.heatmap} />
-                {/* <Layer {...heatmapLayer2} /> */}
-              </Source>)
-              ))}  
+                {this.state.queryResults.map((result) => (
+                  result.selected && (
+                    <Source type="geojson" data={result.layer}>
+                      {/* ... passes in the key value pairs as props to Layer */}
+                      <Layer {...result.heatmap} />
+                      {/* <Layer {...heatmapLayer2} /> */}
+                    </Source>)
+                ))}
 
               </ReactMapGL>
               <div className="control-panel">
-        <h3>Heatmap</h3>
-      
-        <hr />
-        {this.state.queryResults.map((result, index) => {
-          return <div>Test test
+                <h3>Heatmap</h3>
+
+                <hr />
+                {this.state.queryResults.map((result, index) => {
+                  return <div>Test test
           <Checkbox checked={result.selected} onChange={() => this.toggleResultSelected(index)}>{}
-            {/* TODO: what should be printed here (entire query is too long, maybe qid?) */}
-          </Checkbox></div>
-        })}
-      </div>
+                      {/* TODO: what should be printed here (entire query is too long, maybe qid?) */}
+                    </Checkbox></div>
+                })}
+              </div>
             </div>
           </Content>
         </Layout >
