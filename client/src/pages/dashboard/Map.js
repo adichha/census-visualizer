@@ -15,6 +15,8 @@ import { queries } from '@testing-library/react';
 import { Api } from '../../network/api/Api';
 import { Legend } from './Legend';
 import './app.css';
+import {VisualQueryEditor} from "./VisualQueryEditor";
+
 const { Sider, Content } = Layout;
 const { Title } = Typography;
 
@@ -450,8 +452,32 @@ export class Map extends Component {
   }
 
   render() {
+<<<<<<< HEAD
     const { mapStyle} = this.state;
 
+=======
+    const { viewport, data, allDay, selectedTime, startTime, endTime, mapStyle, isShowFirstLayer, isShowSecondLayer } = this.state;
+
+    let heatmapLayer2 = heatmapLayer
+    // heatmapLayer2.paint["heatmap-color"] = [
+    //   'interpolate',
+    //   ['linear'],
+    //   ['heatmap-density'],
+    //   0,
+    //   'rgba(33,102,172,0)',
+    //   0.2,
+    //   'rgb(11, 64, 8)',
+    //   0.4,
+    //   'rgb(29, 89, 25)',
+    //   0.6,
+    //   'rgb(34, 181, 24)',
+    //   0.8,
+    //   'rgb(111, 217, 104)',
+    //   0.9,
+    //   'rgb(165, 230, 161)'
+    // ]
+    console.log(this.state.queryResults);
+>>>>>>> 64e950b1967b124cb10640521cdde894608cebc7
     return (
       <Layout style={{ minHeight: '100%' }}>
         <CreateSearchQueryModal
@@ -527,6 +553,7 @@ export class Map extends Component {
                 {...this.state.viewport}
                 onViewportChange={viewport => this.onViewportChange(viewport)}
                 mapboxApiAccessToken='pk.eyJ1IjoidHBpbnRvNyIsImEiOiJja2JicWYwMzkwM3NnMnNtZnZkbXU5dGhkIn0.NdzHwoMYvZ-fSTIA9xXXfw'
+
               >
               {this.state.queryResults.map((result) => (
                 result.selected && (
@@ -546,7 +573,6 @@ export class Map extends Component {
                     </Checkbox> {result.qid} </div> 
                 })}
               </div>
-              
               <div className="map-legends">
                 {this.state.queryResults.map((result, index) => {
                   return (
@@ -554,10 +580,10 @@ export class Map extends Component {
                   )
                 })}
               </div>
-              {/* <div className="map-legends">
-                <Legend minimum={100} maximum={10000} color={"#723122"} units={"kg"} queryId={123} />
-                <Legend minimum={100} maximum={10000} color={"#723122"} units={"kg"} queryId={123} />
-              </div> */}
+
+                <div className="control-panel2">
+                  <VisualQueryEditor queries={this.state.queryResults} onChange={(queries) => {this.setState({queryResults: queries}); }}/>
+                </div>
             </div>
           </Content>
         </Layout > 
