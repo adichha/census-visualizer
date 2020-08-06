@@ -452,32 +452,8 @@ export class Map extends Component {
   }
 
   render() {
-<<<<<<< HEAD
     const { mapStyle} = this.state;
 
-=======
-    const { viewport, data, allDay, selectedTime, startTime, endTime, mapStyle, isShowFirstLayer, isShowSecondLayer } = this.state;
-
-    let heatmapLayer2 = heatmapLayer
-    // heatmapLayer2.paint["heatmap-color"] = [
-    //   'interpolate',
-    //   ['linear'],
-    //   ['heatmap-density'],
-    //   0,
-    //   'rgba(33,102,172,0)',
-    //   0.2,
-    //   'rgb(11, 64, 8)',
-    //   0.4,
-    //   'rgb(29, 89, 25)',
-    //   0.6,
-    //   'rgb(34, 181, 24)',
-    //   0.8,
-    //   'rgb(111, 217, 104)',
-    //   0.9,
-    //   'rgb(165, 230, 161)'
-    // ]
-    console.log(this.state.queryResults);
->>>>>>> 64e950b1967b124cb10640521cdde894608cebc7
     return (
       <Layout style={{ minHeight: '100%' }}>
         <CreateSearchQueryModal
