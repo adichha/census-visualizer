@@ -377,6 +377,8 @@ export class FriendsPage extends React.Component {
           })} />
 
         </Modal>
+        <Title level={4}>Shared Queries</Title>
+        <Input.Search size="large" placeholder="import your friend's query here" onSearch={value => console.log(value)} enterButton="Copy" />
       </div >
     );
   }

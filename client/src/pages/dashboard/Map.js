@@ -249,12 +249,18 @@ export class Map extends Component {
   async copyQueries() {
     const queries = this.state.queries;
     let result = '';
+    let firstSelected = true
     for(let i = 0; i < queries.length; ++i){
       if(queries[i].selected){
-        result += queries[i].query.qid
+        if(firstSelected) {
+          firstSelected = !firstSelected;
+          result += queries[i].query.qid
+        } else {
+          result += ", " + queries[i].query.qid
+        }
       }
     }
-    const message = this.state.username + result
+    const message = "Select " + result + " from " + this.state.username 
     navigator.clipboard.writeText(message)
   }
   async saveQuery(query) {
