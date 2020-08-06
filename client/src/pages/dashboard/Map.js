@@ -12,6 +12,7 @@ import {
 import { CreateSearchQueryModal } from './modal/CreateSearchQueryModal';
 import { queries } from '@testing-library/react';
 import { Api } from '../../network/api/Api';
+import { Legend } from './Legend';
 import './app.css';
 const { Sider, Content } = Layout;
 const { Title } = Typography;
@@ -599,9 +600,12 @@ export class Map extends Component {
                     </Checkbox></div>
                 })}
               </div>
+              <div className="control-panel1">
+                <Legend maximum={10000} granularity={2500} color={"#723122"}/>
+              </div>
             </div>
           </Content>
-        </Layout >
+        </Layout > 
       </Layout >
     );
   }

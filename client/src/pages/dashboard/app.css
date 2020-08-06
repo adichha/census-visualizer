@@ -22,3 +22,27 @@ body {
   outline: none;
   text-transform: uppercase;
 }
+
+.control-panel1 {
+  position: absolute;
+  bottom: 20px;
+  right: 0;
+  max-width: 320px;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  padding: 12px 24px;
+  margin: 20px;
+  font-size: 13px;
+  line-height: 2;
+  color: #6b6b76;
+  outline: none;
+  text-transform: uppercase;
+}
+
+.legend h4 span {
+  border-radius: 50%;
+  display: inline-block;
+  height: 10px;
+  margin-right: 5px;
+  width: 10px;
+}
