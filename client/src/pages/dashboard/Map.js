@@ -360,7 +360,7 @@ export class Map extends Component {
       result[i].selected = false;
     }
     for(let i = 0; i < result.length; ++i){
-      result[i].id = i;
+      result[i].qid = queriesToRun[i];
     }
     console.log(result);
       this.setState({ queryResults: result, isLoading: false });
@@ -621,8 +621,8 @@ export class Map extends Component {
               >
               {this.state.queryResults.map((result) => (
                 result.selected && (
-                <Source id={"layer" + result.id} type="geojson" data={result.layer}>
-                <Layer id={"layer" + result.id} {...result.heatmap} />
+                <Source id={"layer" + result.qid} type="geojson" data={result.layer}>
+                <Layer id={"layer" + result.qid} {...result.heatmap} />
               </Source>)
               ))}  
 
@@ -635,7 +635,7 @@ export class Map extends Component {
                   return <div>
           <Checkbox checked={result.selected} onChange={() => this.toggleResultSelected(index)}>{}
                       {/* TODO: what should be printed here (entire query is too long, maybe qid?) */}
-                    </Checkbox> {result.query.qid} </div> 
+                    </Checkbox> {result.qid} </div> 
                 })}
               </div>
               <div className="control-panel1">
