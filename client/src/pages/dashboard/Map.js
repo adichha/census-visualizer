@@ -131,7 +131,8 @@ export class Map extends Component {
       viewport: {
         latitude: 43.4643,
         longitude: -80.5204,
-        zoom: 8
+        zoom: 8,
+        maxZoom: 8.4,
       },
       data: null,
       allDay: true,
@@ -319,16 +320,12 @@ export class Map extends Component {
     console.log("run queries");
     console.log(queriesToRun);
     const result = await Api.runQueries(queriesToRun);
+    console.log(result);
     result[0].selected = true;
-    let val = 0;
-    for(let i = 0; i < result[0].features.length; ++i){
-      val += result[0].features[i].properties.mag;
-    }
-    console.log(val);
     for(let i = 1; i < result.length; ++i){
       result[i].selected = false;
     }
-    console.log(result)
+    console.log(result);
     this.setState({queryResults: result});
   }
 
@@ -580,9 +577,9 @@ export class Map extends Component {
               >
               {this.state.queryResults.map((result) => (
                 result.selected && (
-                <Source type="geojson" data={result}>
+                <Source type="geojson" data={result.layer}>
                 {/* ... passes in the key value pairs as props to Layer */}
-                <Layer {...heatmapLayer} />
+                <Layer {...result.heatmap} />
                 {/* <Layer {...heatmapLayer2} /> */}
               </Source>)
               ))}  
