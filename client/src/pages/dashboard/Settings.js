@@ -20,27 +20,23 @@ export class Settings extends Component {
     }
 
     async fetchUserInfo() {
-      // const userInfo = await Api.getUserMe();
-      const userInfo = {dark_mode: true};
+      const userInfo = await Api.getUserMe();
+      // const userInfo = {dark_mode: true};
       await this.setState({
+        username: userInfo.user_name,
+        first: userInfo.first_name,
+        last: userInfo.last_name,
+        numQueries: userInfo.num_queries,
         isDarkModeEnabled: userInfo.dark_mode
       });
     }
 
-    // TODO: onComponentMount call user me, initialize toggle
-    // note: when was function, could not access state
     toggleDarkMode = (checked) => {
       // TODO: call api when backend is up
-      // await Api.updateDarkMode(checked);
+      if(checked){
+        Api.updateDarkMode(true);
+      } else Api.updateDarkMode(false);
       this.setState({isDarkModeEnabled: checked});
-
-
-        // console.log(`checked = ${checked}`);
-        // if (checked) {
-        //   this.setState({ mapStyle: "mapbox://styles/mapbox/dark-v9" })
-        // } else {
-        //   this.setState({ mapStyle: "mapbox://styles/mapbox/light-v9" })
-        // }
     }
     render(){
         return (

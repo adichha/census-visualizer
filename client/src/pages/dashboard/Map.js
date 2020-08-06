@@ -155,8 +155,7 @@ export class Map extends Component {
 
   async setMapStyle() {
     // TODO: when API is up
-    // const userInfo = await Api.getUserMe();
-    const userInfo = {dark_mode: true};
+    const userInfo = await Api.getUserMe();
     if (userInfo && userInfo.dark_mode) {
       this.setState({ mapStyle: "mapbox://styles/mapbox/dark-v9" })
     } else {
@@ -320,6 +319,11 @@ export class Map extends Component {
     console.log(queriesToRun);
     const result = await Api.runQueries(queriesToRun);
     result[0].selected = true;
+    let val = 0;
+    for(let i = 0; i < result[0].features.length; ++i){
+      val += result[0].features[i].properties.mag;
+    }
+    console.log(val);
     for(let i = 1; i < result.length; ++i){
       result[i].selected = false;
     }

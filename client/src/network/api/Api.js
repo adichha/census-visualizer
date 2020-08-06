@@ -19,7 +19,7 @@ export class Api {
               (UserStore.authToken && `Bearer ${UserStore.authToken}`) || '',
             'Content-Type': 'application/json',
           },
-          data: payload || {},
+          data: payload === undefined ? undefined : payload,
         })
         resolve(response.data)
       } catch (e) {
