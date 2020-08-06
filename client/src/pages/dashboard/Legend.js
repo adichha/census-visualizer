@@ -8,9 +8,8 @@ export class Legend extends React.Component {
         for (let i = maximum; i >= 0; i -= scale) {
             entries.push(i);
         }
-        console.log(entries)
         return (
-        <div>
+        <div class="floatleft">
             <h4><span style={{backgroundColor: color}}></span>{'QID: ' + queryId}</h4>
             <div id="state-legend" class="legend">
                 {entries.map((value, idx) => (
