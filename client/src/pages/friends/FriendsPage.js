@@ -1,6 +1,5 @@
 import React from 'react';
-import { Input, AutoComplete, Table, Tag, Space, message, Modal, Button, Checkbox } from 'antd';
-import { Typography } from 'antd';
+import { Input, AutoComplete, Table, Tag, Space, message, Modal, Button, Checkbox, Typography } from 'antd';
 import { Api } from '../../network/api/Api';
 const { Title } = Typography;
 const educationLUT = {
@@ -193,15 +192,16 @@ export class FriendsPage extends React.Component {
     const req = [];
     for (let i = 0; i < queries.length; ++i) {
       if (queries[i].selected) {
-        const shareQuery = {
-          qid: queries[i].qid,
-          username: username
-        }
-        req.push(shareQuery);
+        // const shareQuery = {
+        //   qid: qidqueries[i].,
+        //   username: username
+        // }
+        // req.push(shareQuery);
+        req.push(queries[i].qid)
       }
     }
     console.log(req)
-    await Api.shareQueries(req);
+    await Api.duplicateQueries(req);
     this.setState({ showModal: false, modalUsername: '', queries: [] })
   }
 

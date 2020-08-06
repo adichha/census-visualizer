@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
 import ReactMapGL, { Source, Layer } from 'react-map-gl';
 import { heatmapLayer } from './map-style';
-import { json as requestJson } from 'd3-request';
 import { List, Switch as Toggle, Layout, Typography, Button, Checkbox } from 'antd';
 import {
   PlusOutlined,
   DeleteOutlined,
   EditOutlined,
-  SearchOutlined
+  SearchOutlined,
+  CopyOutlined
 } from '@ant-design/icons'
+import { UserStore } from '../../stores/UserStore';
 import { CreateSearchQueryModal } from './modal/CreateSearchQueryModal';
 import { queries } from '@testing-library/react';
 import { Api } from '../../network/api/Api';
@@ -146,20 +147,14 @@ export class Map extends Component {
         zoom: 8,
         maxZoom: 8.4,
       },
-      data: null,
-      allDay: true,
-      startTime: current,
-      endTime: current,
       selectedTime: current,
       modalVisible: false,
-      earthquakes: null,
-      mapStyle: "",
-      isShowFirstLayer: true,
-      isShowSecondLayer: false,
+      mapStyle: '',
       queries: [],
       sharedQueries: [],
       queryResults: [],
       isLoading: false,
+      username: ''
     };
   }
 
@@ -169,34 +164,24 @@ export class Map extends Component {
   }
 
   async setMapStyle() {
-    // TODO: when API is up
     const userInfo = await Api.getUserMe();
     if (userInfo && userInfo.dark_mode) {
-      this.setState({ mapStyle: "mapbox://styles/mapbox/dark-v9" })
+      this.setState({ mapStyle: "mapbox://styles/mapbox/dark-v9", username: userInfo.user_name })
     } else {
-      this.setState({ mapStyle: "mapbox://styles/mapbox/light-v9" })
+      this.setState({ mapStyle: "mapbox://styles/mapbox/light-v9", username: userInfo.user_name })
     }
   }
 
   async fetchData() {
     const userQueries = await Api.fetchAllQueries();
-    // console.log(apiQueries);
-
     const sharedQueries = await Api.getSharedQueries();
     const apiQueries = [...userQueries, ...sharedQueries];
-    // apiQueries.push(sharedQueries);
-    console.log(apiQueries);
-    console.log(sharedQueries);
-    // @TODO: Tyler: transform the return type from queries
-    // into this.setState({ queries ....... })...
     let queries = [];
     for (let i = 0; i < apiQueries.length; ++i) {
-      // note: need to deal w query exists?
       const apiQuery = apiQueries[i];
       const education = [];
       const income = [];
       const employment = [];
-      let sex = [];
       const age = [];
       if (!(apiQuery.params.length === 1 && apiQuery.params[0] === 1)) {
         if (apiQuery.dataset === "education") {
@@ -214,8 +199,7 @@ export class Map extends Component {
           }
         }
       }
-      sex = apiQuery.sex && apiQuery.sex !== 1 ? [sexLUT[apiQuery.sex]] : ["male", "female"];
-      // TODO: i should not be storing malefemale 
+      const sex = apiQuery.sex && apiQuery.sex !== 1 ? [sexLUT[apiQuery.sex]] : ["male", "female"];
       if (apiQuery.age) {
         for (let j = 0; j < apiQuery.age.length; ++j) {
           if (apiQuery.age[j] !== 1) {
@@ -223,7 +207,6 @@ export class Map extends Component {
           }
         }
       }
-      // TODO: need to fix age in query builder
       const query = {
         qid: apiQuery.qid,
         database: apiQuery.dataset,
@@ -242,7 +225,6 @@ export class Map extends Component {
       queries.push(queryWrapper);
     }
     this.setState({ queries: queries });
-    console.log(this.state.queries);
   }
 
   async addQueryToBuilder(values) {
@@ -264,9 +246,19 @@ export class Map extends Component {
     })
   }
 
+  async copyQueries() {
+    const queries = this.state.queries;
+    let result = '';
+    for(let i = 0; i < queries.length; ++i){
+      if(queries[i].selected){
+        result += queries[i].query.qid
+      }
+    }
+    const message = this.state.username + result
+    navigator.clipboard.writeText(message)
+  }
   async saveQuery(query) {
     const params = [];
-    // TODO: if all length or none, do total. 
     if (query.database === "education") {
       if (!query.education || query.education.length === 0 || query.education.length === 14) {
         params.push(1);
@@ -297,9 +289,7 @@ export class Map extends Component {
       "dataset": query.database,
       "params": params
     }];
-    // if(params.length > 0){
-    //   apiQuery[0].params = params;
-    // }
+
     if (query.age && query.age.length > 1) {
       const age = [];
       for (let i = 0; i < query.age.length; ++i) {
@@ -311,15 +301,10 @@ export class Map extends Component {
     if (query.sex && query.sex.length == 1) {
       apiQuery[0].sex = sexLUTReverse[query.sex[0]];
     } else apiQuery[0].sex = 1;
-    console.log(query);
     if (query.qid) {
       apiQuery[0].qid = query.qid;
     }
-    console.log(apiQuery);
-    let data = await Api.saveQuery(apiQuery);
-    console.log("daokdaodka");
-    console.log(data);
-    return data;
+    return await Api.saveQuery(apiQuery);
   }
 
   async deleteQueries() {
@@ -339,7 +324,6 @@ export class Map extends Component {
   }
 
   async deleteQueriesAPI(qids) {
-    console.log(qids);
     await Api.deleteQueries(qids);
   }
 
@@ -350,20 +334,17 @@ export class Map extends Component {
     let size = queries.length;
     for (let i = 0; i < size; ++i) {
       if (queries[i].selected) {
-        console.log(queries[i].query.qid);
         queriesToRun.push(queries[i].query.qid);
       }
     }
     const result = await Api.runQueries(queriesToRun);
-    result[0].selected = true;
-    for (let i = 1; i < result.length; ++i) {
-      result[i].selected = false;
-    }
-    for(let i = 0; i < result.length; ++i){
+    for (let i = 0; i < result.length; ++i) {
+      if(i === 0) result[0].selected = true;
+      else result[i].selected = false;
+
       result[i].qid = queriesToRun[i];
     }
-    console.log(result);
-      this.setState({ queryResults: result, isLoading: false });
+    this.setState({ queryResults: result, isLoading: false });
   }
 
   toggleQuerySelected = (index) => {
@@ -376,14 +357,6 @@ export class Map extends Component {
     const result = this.state.queryResults;
     result[index].selected = !result[index].selected;
     this.setState({ queryResults: result });
-  }
-
-  toggleIsShowFirstLayer = checked => {
-    this.setState({ isShowFirstLayer: !checked });
-  }
-
-  toggleIsShowSecondLayer = checked => {
-    this.setState({ isShowSecondLayer: !checked });
   }
 
   toggleModalVisible = (index) => {
@@ -448,10 +421,7 @@ export class Map extends Component {
         }
       }
       str += ` from ${database}`;
-      if (sex) {
-        if (sex.length == 0) {
-          // TODO: add to male/female?
-        }
+      if (sex && sex.length == 1) {
         str += ` where sex is `;
         str += this.buildQueryArrayHelper(sex);
       }
@@ -460,7 +430,6 @@ export class Map extends Component {
         str += ' and';
       }
 
-      // make it lower range bound (15, 25, 35)
       if (age && age.length > 0) {
         str += ` where age is `;
         str += this.buildQueryArrayHelper(age);
@@ -474,40 +443,9 @@ export class Map extends Component {
     this.setState({ viewport: etc })
   }
 
-  // TODO : execute
-  // query (POST)
-  // user/query_by_id 
-  // pass in by qid (array) -> list 
-  // returns a geojson 
-
-  // TODO : friends pages
-  // find profiles
-  // add friends
-  // list friends
-
-  // TODO : user profile page
-
   render() {
-    const { viewport, data, allDay, selectedTime, startTime, endTime, mapStyle, isShowFirstLayer, isShowSecondLayer } = this.state;
+    const { mapStyle} = this.state;
 
-    let heatmapLayer2 = heatmapLayer
-    // heatmapLayer2.paint["heatmap-color"] = [
-    //   'interpolate',
-    //   ['linear'],
-    //   ['heatmap-density'],
-    //   0,
-    //   'rgba(33,102,172,0)',
-    //   0.2,
-    //   'rgb(11, 64, 8)',
-    //   0.4,
-    //   'rgb(29, 89, 25)',
-    //   0.6,
-    //   'rgb(34, 181, 24)',
-    //   0.8,
-    //   'rgb(111, 217, 104)',
-    //   0.9,
-    //   'rgb(165, 230, 161)'
-    // ]
     return (
       <Layout style={{ minHeight: '100%' }}>
         <CreateSearchQueryModal
@@ -518,7 +456,6 @@ export class Map extends Component {
             if (typeof values.sex != 'undefined' && values.sex.length == 0) {
               values.sex = ["male", "female"];
             }
-            console.log(values);
             this.addQueryToBuilder(values);
 
           }}
@@ -535,6 +472,7 @@ export class Map extends Component {
           }}>
             <Title level={3}>Query Builder</Title>
             <Button type="dashed" onClick={() => this.setState({ modalVisible: true })} icon={<PlusOutlined />} />
+            <Button type="dashed" disabled={!this.querySelected()} onClick={() => this.copyQueries()} icon={<CopyOutlined />} />
             <Button type="dashed" disabled={!this.querySelected()} onClick={() => this.deleteQueries()} icon={<DeleteOutlined />} />
             <Button type="dashed" loading={this.state.isLoading} disabled={!this.querySelected()} onClick={() => this.runQueries()} icon={<SearchOutlined />} />
             <br />
@@ -545,7 +483,6 @@ export class Map extends Component {
                 isCreate={false}
                 visible={query.modalVisible}
                 onCreate={(values) => {
-                  console.log(values);
                   const oldQueries = this.state.queries;
                   values.qid = oldQueries[index].query.qid;
                   oldQueries[index].query = values;
@@ -554,9 +491,7 @@ export class Map extends Component {
                   if (this.queryExists(oldQueries[index], index) !== -1) {
                     this.deleteQueries([oldQueries[index].query.qid]);
                     oldQueries.splice(index, 1);
-                    // TODO: call deleteQuery
                   } else {
-                    // TODO: should update instead of creating a new one 
                     this.saveQuery(oldQueries[index].query);
                   }
                   this.setState({
@@ -574,40 +509,7 @@ export class Map extends Component {
                 </List.Item></div>
             })}
           </List>
-          <List>
-            {this.state.sharedQueries.map((query, index) => {
-              return <div><CreateSearchQueryModal
-                isCreate={false}
-                visible={query.modalVisible}
-                onCreate={(values) => {
-                  console.log(values);
-                  const oldQueries = this.state.queries;
-                  values.qid = oldQueries[index].query.qid;
-                  oldQueries[index].query = values;
-                  oldQueries[index].modalVisible = false;
-                  // don't add if already exists
-                  if (this.queryExists(oldQueries[index], index) !== -1) {
-                    this.deleteQueries([oldQueries[index].query.qid]);
-                    oldQueries.splice(index, 1);
-                    // TODO: call deleteQuery
-                  } else {
-                    // TODO: should update instead of creating a new one 
-                    this.saveQuery(oldQueries[index].query);
-                  }
-                  this.setState({
-                    queries: oldQueries
-                  })
-                }}
-                onCancel={() => {
-                  this.toggleModalVisible(index);
-                }}
-                query={query.query}
-              ></CreateSearchQueryModal>
-                <List.Item><Checkbox checked={query.selected} onChange={() => this.toggleQuerySelected(index)}>{this.buildQuery(query.query)} ( QID: <b>{query.query.qid}</b>)</Checkbox>
-                  <Button type="dashed" onClick={() => this.toggleModalVisible(index)} icon={<EditOutlined />} />
-                </List.Item></div>
-            })}
-          </List>
+  
         </Sider>
         <Layout>
           <Content>
@@ -635,7 +537,6 @@ export class Map extends Component {
                 {this.state.queryResults.map((result, index) => {
                   return <div>
           <Checkbox checked={result.selected} onChange={() => this.toggleResultSelected(index)}>{}
-                      {/* TODO: what should be printed here (entire query is too long, maybe qid?) */}
                     </Checkbox> {result.qid} </div> 
                 })}
               </div>

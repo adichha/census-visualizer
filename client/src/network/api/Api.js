@@ -102,4 +102,9 @@ export class Api {
     const data = await await Api.createRequest(`user/icon`, 'POST', payload);
     return data;
   }
+
+  static duplicateQueries = async (payload) => {
+    const data = await Api.createRequest(`user/duplicate`, 'POST', payload);
+    return data;
+  }
 }
