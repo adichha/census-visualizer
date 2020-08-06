@@ -4,7 +4,7 @@ export class Legend extends React.Component {
     render() {
         const { minimum, maximum, color, units, queryId } = this.props;
         let entries = []
-        const scale = (maximum - minimum)/5;
+        const scale = (maximum - minimum)/4;
         for (let i = maximum; i >= 0; i -= scale) {
             entries.push(i);
         }
