@@ -46,3 +46,9 @@ body {
   margin-right: 5px;
   width: 10px;
 }
+
+#legend-units {
+  font-weight: 250;
+  font-size: 12;
+  text-transform: lowercase;
+}

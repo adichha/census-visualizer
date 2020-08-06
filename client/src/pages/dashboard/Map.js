@@ -603,7 +603,7 @@ export class Map extends Component {
                 })}
               </div>
               <div className="control-panel1">
-                <Legend maximum={10000} granularity={2500} color={"#723122"}/>
+                <Legend minimum={100} maximum={10000} color={"#723122"} units={"kg"} queryId={123} />
               </div>
             </div>
           </Content>
