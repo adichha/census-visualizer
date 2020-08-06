@@ -92,4 +92,9 @@ export class Api {
     const data = await Api.createRequest(`user/share_queries`, 'POST', payload);
     return data;
   }
+
+  static getSharedQueries = async (payload) => {
+    const data = await Api.createRequest(`user/shared_queries`, 'GET', payload);
+    return data;
+  }
 }
