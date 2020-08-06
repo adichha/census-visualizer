@@ -639,7 +639,8 @@ export class Map extends Component {
                     </Checkbox> {result.qid} </div> 
                 })}
               </div>
-              <div className="control-panel1">
+              <div className="map-legends">
+                <Legend minimum={100} maximum={10000} color={"#723122"} units={"kg"} queryId={123} />
                 <Legend minimum={100} maximum={10000} color={"#723122"} units={"kg"} queryId={123} />
               </div>
             </div>

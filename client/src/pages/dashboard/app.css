@@ -23,7 +23,7 @@ body {
   text-transform: uppercase;
 }
 
-.control-panel1 {
+.map-legends {
   position: absolute;
   bottom: 20px;
   right: 0;
@@ -36,7 +36,6 @@ body {
   line-height: 2;
   color: #6b6b76;
   outline: none;
-  text-transform: uppercase;
 }
 
 .legend h4 span {
@@ -50,5 +49,10 @@ body {
 #legend-units {
   font-weight: 250;
   font-size: 12;
-  text-transform: lowercase;
+}
+
+.floatleft {
+  float: left;
+  padding: 10px;
+  text-align: center;
 }
