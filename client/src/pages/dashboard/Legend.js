@@ -6,7 +6,12 @@ export class Legend extends React.Component {
         let entries = []
         const scale = (maximum - minimum)/4;
         for (let i = maximum; i >= 0; i -= scale) {
-            entries.push(i.toFixed(2));
+            if (units != 'people') {
+                entries.push(i.toFixed(2));
+            }
+            else {
+                entries.push(Math.round(i));
+            }
         }
         return (
         <div className="floatleft">
