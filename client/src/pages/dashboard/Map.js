@@ -639,10 +639,18 @@ export class Map extends Component {
                     </Checkbox> {result.qid} </div> 
                 })}
               </div>
+              
               <div className="map-legends">
-                <Legend minimum={100} maximum={10000} color={"#723122"} units={"kg"} queryId={123} />
-                <Legend minimum={100} maximum={10000} color={"#723122"} units={"kg"} queryId={123} />
+                {this.state.queryResults.map((result, index) => {
+                  return (
+                    <Legend minimum={100} maximum={10000} color={"#723122"} units={"kg"} queryId={123} />
+                  )
+                })}
               </div>
+              {/* <div className="map-legends">
+                <Legend minimum={100} maximum={10000} color={"#723122"} units={"kg"} queryId={123} />
+                <Legend minimum={100} maximum={10000} color={"#723122"} units={"kg"} queryId={123} />
+              </div> */}
             </div>
           </Content>
         </Layout > 
