@@ -144,6 +144,7 @@ export class Map extends Component {
       isShowFirstLayer: true,
       isShowSecondLayer: false,
       queries: [],
+      sharedQueries: [],
       queryResults: []
     };
   }
@@ -531,6 +532,40 @@ export class Map extends Component {
                 </List.Item></div>
             })}
           </List>
+          <List>
+            {this.state.sharedQueries.map((query, index) => {
+              return <div><CreateSearchQueryModal
+                isCreate={false}
+                visible={query.modalVisible}
+                onCreate={(values) => {
+                  console.log(values);
+                  const oldQueries = this.state.queries;
+                  values.qid = oldQueries[index].query.qid;
+                  oldQueries[index].query = values;
+                  oldQueries[index].modalVisible = false;
+                  // don't add if already exists
+                  if (this.queryExists(oldQueries[index], index) !== -1) {
+                    this.deleteQueries([oldQueries[index].query.qid]);
+                    oldQueries.splice(index, 1);
+                    // TODO: call deleteQuery
+                  } else {
+                    // TODO: should update instead of creating a new one 
+                    this.saveQuery(oldQueries[index].query);
+                  }
+                  this.setState({
+                    queries: oldQueries
+                  })
+                }}
+                onCancel={() => {
+                  this.toggleModalVisible(index);
+                }}
+                query={query.query}
+              ></CreateSearchQueryModal>
+                <List.Item><Checkbox checked={query.selected} onChange={() => this.toggleQuerySelected(index)}>{this.buildQuery(query.query)}</Checkbox>
+                  <Button type="dashed" onClick={() => this.toggleModalVisible(index)} icon={<EditOutlined />} />
+                </List.Item></div>
+            })}
+          </List>
         </Sider>
         <Layout>
           <Content>
@@ -558,11 +593,11 @@ export class Map extends Component {
       
         <hr />
         {this.state.queryResults.map((result, index) => {
-        return <div>Test test
-        <Checkbox checked={result.selected} onChange={() => this.toggleResultSelected(index)}>{}
-          {/* TODO: what should be printed here (entire query is too long, maybe qid?) */}
-        </Checkbox></div>
-      })}
+          return <div>Test test
+          <Checkbox checked={result.selected} onChange={() => this.toggleResultSelected(index)}>{}
+            {/* TODO: what should be printed here (entire query is too long, maybe qid?) */}
+          </Checkbox></div>
+        })}
       </div>
             </div>
           </Content>

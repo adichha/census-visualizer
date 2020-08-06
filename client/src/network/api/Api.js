@@ -82,4 +82,14 @@ export class Api {
     const data = await Api.createRequest(`user/friends`, 'GET');
     return data;
   }
+
+  static getFriendQueries = async (payload) => {
+    const data = await Api.createRequest(`user/friend_queries?username=${payload}`, 'GET', payload);
+    return data;
+  }
+
+  static shareQueries = async (payload) => {
+    const data = await Api.createRequest(`user/share_queries`, 'POST', payload);
+    return data;
+  }
 }
