@@ -203,3 +203,6 @@ CREATE INDEX individual_incomes_meta_age_sex_index
 
 CREATE INDEX population_meta_age_sex_index
 	ON population (meta, age, sex);
+
+CREATE INDEX population_meta_age_sex_geocode_index
+    ON population (meta, age, sex, geocode);
