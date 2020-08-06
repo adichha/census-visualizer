@@ -166,10 +166,13 @@ export class Map extends Component {
   }
 
   async fetchData() {
-    const apiQueries = await Api.fetchAllQueries();
-    console.log(apiQueries);
+    const userQueries = await Api.fetchAllQueries();
+    // console.log(apiQueries);
 
     const sharedQueries = await Api.getSharedQueries();
+    const apiQueries = [...userQueries, ...sharedQueries];
+    // apiQueries.push(sharedQueries);
+    console.log(apiQueries);
     console.log(sharedQueries);
     // @TODO: Tyler: transform the return type from queries
     // into this.setState({ queries ....... })...

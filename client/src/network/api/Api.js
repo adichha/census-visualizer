@@ -94,7 +94,12 @@ export class Api {
   }
 
   static getSharedQueries = async (payload) => {
-    const data = await Api.createRequest(`user/shared_queries`, 'GET', payload);
+    const data = await Api.createRequest(`user/shared_queries?username=Shabhazattack`, 'GET', payload);
+    return data;
+  }
+
+  static updateIcon = async (payload) => {
+    const data = await await Api.createRequest(`user/icon`, 'POST', payload);
     return data;
   }
 }
