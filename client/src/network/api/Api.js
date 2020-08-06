@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { UserStore } from '../../stores/UserStore'
 
-export const baseUrl = 'http://census-viz.herokuapp.com/'
+export const baseUrl = 'http://localhost:8080/'
 
 export class Api {
   static createRequest = (
