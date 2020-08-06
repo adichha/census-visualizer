@@ -1,0 +1,39 @@
+.editor-base {
+    display: flex;
+    flex-direction: column;
+}
+.editor {
+}
+
+.swatch1, .swatch2, .swatch3, .swatch4, .swatch5, .swatch6, .swatch6 {
+    height: 32px;
+    width: 32px;
+}
+
+.swatch1 {
+    background-color: hsl(193, 70%, 50%);
+}
+
+.swatch2 {
+    background-color: hsl(42, 70%, 50%);
+}
+
+.swatch3 {
+    background-color: hsl(283, 70%, 50%);
+}
+
+.swatch4 {
+    background-color: hsl(91, 70%, 50%);
+}
+
+.swatch5 {
+    background-color: hsl(9, 70%, 50%);
+}
+
+.swatch6 {
+    background-color: hsl(26, 70%, 50%);
+}
+
+.swatch7 {
+    background-color: hsl(170, 70%, 50%);
+}

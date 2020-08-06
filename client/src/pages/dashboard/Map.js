@@ -14,6 +14,8 @@ import { queries } from '@testing-library/react';
 import { Api } from '../../network/api/Api';
 import { Legend } from './Legend';
 import './app.css';
+import {VisualQueryEditor} from "./VisualQueryEditor";
+
 const { Sider, Content } = Layout;
 const { Title } = Typography;
 
@@ -508,6 +510,7 @@ export class Map extends Component {
     //   0.9,
     //   'rgb(165, 230, 161)'
     // ]
+    console.log(this.state.queryResults);
     return (
       <Layout style={{ minHeight: '100%' }}>
         <CreateSearchQueryModal
@@ -619,6 +622,7 @@ export class Map extends Component {
                 {...this.state.viewport}
                 onViewportChange={viewport => this.onViewportChange(viewport)}
                 mapboxApiAccessToken='pk.eyJ1IjoidHBpbnRvNyIsImEiOiJja2JicWYwMzkwM3NnMnNtZnZkbXU5dGhkIn0.NdzHwoMYvZ-fSTIA9xXXfw'
+
               >
               {this.state.queryResults.map((result) => (
                 result.selected && (
@@ -639,7 +643,6 @@ export class Map extends Component {
                     </Checkbox> {result.qid} </div> 
                 })}
               </div>
-              
               <div className="map-legends">
                 {this.state.queryResults.map((result, index) => {
                   return (
@@ -647,10 +650,10 @@ export class Map extends Component {
                   )
                 })}
               </div>
-              {/* <div className="map-legends">
-                <Legend minimum={100} maximum={10000} color={"#723122"} units={"kg"} queryId={123} />
-                <Legend minimum={100} maximum={10000} color={"#723122"} units={"kg"} queryId={123} />
-              </div> */}
+
+                <div className="control-panel2">
+                  <VisualQueryEditor queries={this.state.queryResults} onChange={(queries) => {this.setState({queryResults: queries}); }}/>
+                </div>
             </div>
           </Content>
         </Layout > 
