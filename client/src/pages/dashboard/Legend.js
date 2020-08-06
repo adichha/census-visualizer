@@ -6,17 +6,17 @@ export class Legend extends React.Component {
         let entries = []
         const scale = (maximum - minimum)/4;
         for (let i = maximum; i >= 0; i -= scale) {
-            entries.push(i);
+            entries.push(i.toFixed(2));
         }
         return (
-        <div class="floatleft">
+        <div className="floatleft">
             <h4><span style={{backgroundColor: color}}></span>{'QID: ' + queryId}</h4>
-            <div id="state-legend" class="legend">
+            <div id="state-legend" className="legend">
                 {entries.map((value, idx) => (
                     <h4><span style={{backgroundColor: color, opacity: (entries.length - idx)/entries.length}}></span>{value}</h4>
                 ))}
             </div>
-            <p id="legend-units">{'All units in ' + units}</p>
+            <p id="legend-units">{'All values in ' + units}</p>
         </div>
         )
     }

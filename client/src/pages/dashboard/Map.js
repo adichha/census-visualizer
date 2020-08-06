@@ -551,9 +551,11 @@ export class Map extends Component {
               </div>
               <div className="map-legends">
                 {this.state.queryResults.map((result, index) => {
-                  return (
-                    <Legend minimum={100} maximum={10000} color={"#723122"} units={"kg"} queryId={123} />
-                  )
+                  if (result.selected) {
+                    return (
+                      <Legend minimum={result.min} maximum={result.max} color={result.hue} units={result.units} queryId={result.qid} />
+                    )
+                  }
                 })}
               </div>
 
