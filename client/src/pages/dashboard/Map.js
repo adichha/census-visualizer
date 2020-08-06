@@ -330,7 +330,11 @@ export class Map extends Component {
     for (let i = 1; i < result.length; ++i) {
       result[i].selected = false;
     }
-    this.setState({ queryResults: result, isLoading: false });
+    for(let i = 0; i < result.length; ++i){
+      result[i].id = i;
+    }
+    console.log(result);
+      this.setState({ queryResults: result, isLoading: false });
   }
 
   toggleQuerySelected = (index) => {
@@ -579,14 +583,12 @@ export class Map extends Component {
                 onViewportChange={viewport => this.onViewportChange(viewport)}
                 mapboxApiAccessToken='pk.eyJ1IjoidHBpbnRvNyIsImEiOiJja2JicWYwMzkwM3NnMnNtZnZkbXU5dGhkIn0.NdzHwoMYvZ-fSTIA9xXXfw'
               >
-                {this.state.queryResults.map((result) => (
-                  result.selected && (
-                    <Source type="geojson" data={result.layer}>
-                      {/* ... passes in the key value pairs as props to Layer */}
-                      <Layer {...result.heatmap} />
-                      {/* <Layer {...heatmapLayer2} /> */}
-                    </Source>)
-                ))}
+              {this.state.queryResults.map((result) => (
+                result.selected && (
+                <Source id={"layer" + result.id} type="geojson" data={result.layer}>
+                <Layer id={"layer" + result.id} {...result.heatmap} />
+              </Source>)
+              ))}  
 
               </ReactMapGL>
               <div className="control-panel">
