@@ -131,7 +131,8 @@ export class Map extends Component {
       viewport: {
         latitude: 43.4643,
         longitude: -80.5204,
-        zoom: 8
+        zoom: 8,
+        maxZoom: 8.4,
       },
       data: null,
       allDay: true,
@@ -317,19 +318,11 @@ export class Map extends Component {
         queriesToRun.push(queries[i].query.qid);
       }
     }
-    console.log("run queries");
-    console.log(queriesToRun);
     const result = await Api.runQueries(queriesToRun);
     result[0].selected = true;
-    let val = 0;
-    for (let i = 0; i < result[0].features.length; ++i) {
-      val += result[0].features[i].properties.mag;
-    }
-    console.log(val);
-    for (let i = 1; i < result.length; ++i) {
+    for(let i = 1; i < result.length; ++i){
       result[i].selected = false;
     }
-    console.log(result)
     this.setState({ queryResults: result, isLoading: false });
   }
 
@@ -579,6 +572,7 @@ export class Map extends Component {
                 onViewportChange={viewport => this.onViewportChange(viewport)}
                 mapboxApiAccessToken='pk.eyJ1IjoidHBpbnRvNyIsImEiOiJja2JicWYwMzkwM3NnMnNtZnZkbXU5dGhkIn0.NdzHwoMYvZ-fSTIA9xXXfw'
               >
+<<<<<<< HEAD
                 {this.state.queryResults.map((result) => (
                   result.selected && (
                     <Source type="geojson" data={result}>
@@ -587,6 +581,16 @@ export class Map extends Component {
                       {/* <Layer {...heatmapLayer2} /> */}
                     </Source>)
                 ))}
+=======
+              {this.state.queryResults.map((result) => (
+                result.selected && (
+                <Source type="geojson" data={result.layer}>
+                {/* ... passes in the key value pairs as props to Layer */}
+                <Layer {...result.heatmap} />
+                {/* <Layer {...heatmapLayer2} /> */}
+              </Source>)
+              ))}  
+>>>>>>> 379a0c5afd92ae2d334ce69cdffabbde0c0aa0f7
 
               </ReactMapGL>
               <div className="control-panel">
