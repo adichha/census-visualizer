@@ -24,11 +24,15 @@ export const CreateSearchQueryModal = ({
       form.setFieldsValue({
         database: query.database
       })
+    } if(query && typeof form.getFieldsValue().employment === 'undefined'){
+      form.setFieldsValue({
+        employment: query.employment
+      })
     } if(query && typeof form.getFieldsValue().income === 'undefined'){
       form.setFieldsValue({
         income: query.income
       })
-    } if(query && typeof form.getFieldsValue().educatoin === 'undefined'){
+    } if(query && typeof form.getFieldsValue().education === 'undefined'){
       form.setFieldsValue({
         education: query.education
       })
@@ -47,6 +51,7 @@ export const CreateSearchQueryModal = ({
       setDatabaseVal(query.database);
       form.setFieldsValue({
         database: query.database,
+        employment: query.employment,
         income: query.income,
         education: query.education,
         sex: query.sex,
@@ -96,9 +101,29 @@ export const CreateSearchQueryModal = ({
           >
             <Option value="education">Education</Option>
             <Option value="employment">Employment</Option>
+            <Option value="income">Income</Option>
+            <Option value="population">Population</Option>
           </Select>
         </Form.Item>
         {databaseVal == "employment" ? (<Form.Item
+          name="employment"
+          label="Employment"
+          rules={[{ required: false }]}
+        >
+        <Select
+            showSearch
+            mode="multiple"
+            style={{ width: '100%' }}
+            placeholder="Select type of employment"
+            defaultValue={query && query.employment || []}
+            value={query && query.employment|| []}
+          >
+            <Option value="employed">Employed</Option>
+            <Option value="unemployed">Unemployed</Option>
+          </Select>
+        </Form.Item>
+        ) : null}
+        {databaseVal == "income" ? (<Form.Item
           name="income"
           label="Income"
           rules={[{ required: false }]}

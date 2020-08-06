@@ -123,6 +123,17 @@ const ageLUTReverse = {
   "65+": 7
 }
 
+const employmentLUT = {
+  1: "employed",
+  2: "unemployed"
+}
+
+const employmentLUTReverse = {
+  "employed": 1,
+  "unemployed": 2
+}
+
+
 export class Map extends Component {
   constructor(props) {
     super(props);
@@ -183,15 +194,20 @@ export class Map extends Component {
       const apiQuery = apiQueries[i];
       const education = [];
       const income = [];
+      const employment = [];
       let sex = [];
       const age = [];
-      if (!(apiQuery.params.length == 1 && apiQuery.params[0] == 1)) {
+      if (!(apiQuery.params.length === 1 && apiQuery.params[0] === 1)) {
         if (apiQuery.dataset === "education") {
 
           for (let j = 0; j < apiQuery.params.length; ++j) {
             education.push(educationLUT[apiQuery.params[j]]);
           }
         } else if (apiQuery.dataset === "employment") {
+          for (let j = 0; j < apiQuery.params.length; ++j) {
+            employment.push(employmentLUT[apiQuery.params[j]]);
+          }
+        } else if (apiQuery.dataset === "income") {
           for (let j = 0; j < apiQuery.params.length; ++j) {
             income.push(incomeLUT[apiQuery.params[j]]);
           }
@@ -212,6 +228,7 @@ export class Map extends Component {
         database: apiQuery.dataset,
         education: education,
         income: income,
+        employment: employment,
         sex: sex,
         age: age
       };
@@ -250,7 +267,7 @@ export class Map extends Component {
     const params = [];
     // TODO: if all length or none, do total. 
     if (query.database === "education") {
-      if (!query.education || query.education.length == 0 || query.education.length == 14) {
+      if (!query.education || query.education.length === 0 || query.education.length === 14) {
         params.push(1);
       } else {
         for (let i = 0; i < query.education.length; ++i) {
@@ -258,7 +275,15 @@ export class Map extends Component {
         }
       }
     } else if (query.database === "employment") {
-      if (!query.income || query.income.length == 0 || query.income.length == 14) {
+      if (!query.employment || query.employment.length === 0 || query.employment.length === 2) {
+        params.push(1);
+        params.push(2);
+      } else {
+        // length will be 1
+        params.push(employmentLUTReverse[query.employment[0]]);
+      }
+    } else if (query.database === "income") {
+      if (!query.income || query.income.length === 0 || query.income.length === 14) {
         params.push(1);
       } else {
         for (let i = 0; i < query.income.length; ++i) {
@@ -266,10 +291,14 @@ export class Map extends Component {
         }
       }
     }
+
     const apiQuery = [{
       "dataset": query.database,
-      "params": params,
+      "params": params
     }];
+    // if(params.length > 0){
+    //   apiQuery[0].params = params;
+    // }
     if (query.age && query.age.length > 1) {
       const age = [];
       for (let i = 0; i < query.age.length; ++i) {
@@ -365,8 +394,9 @@ export class Map extends Component {
       const currQuery = queries[i].query
       if (query.database === currQuery.database &&
         query.sex === currQuery.sex &&
-        query.income == currQuery.income &&
-        query.education == currQuery.education &&
+        query.income === currQuery.income &&
+        query.education === currQuery.education &&
+        query.employment === currQuery.employment &&
         query.age === currQuery.age) return i;
     }
     return -1;
@@ -390,10 +420,16 @@ export class Map extends Component {
 
   buildQuery = query => {
     if (query !== undefined) {
-      const { database, age, sex, income, education } = query;
+      const { database, age, sex, employment, income, education } = query;
       let str = "";
       str += `Showing`;
       if (database === "employment") {
+        if (!employment || employment.length == 0 || employment.length == 2) {
+          str += ` total employment`;
+        } else {
+          str += this.buildQueryArrayHelper(employment);
+        }
+      } else if (database === "income") {
         if (!income || income.length == 0 || income.length == 15) {
           str += ` total income`;
         } else {
@@ -593,10 +629,10 @@ export class Map extends Component {
 
                 <hr />
                 {this.state.queryResults.map((result, index) => {
-                  return <div>Test test
+                  return <div>
           <Checkbox checked={result.selected} onChange={() => this.toggleResultSelected(index)}>{}
                       {/* TODO: what should be printed here (entire query is too long, maybe qid?) */}
-                    </Checkbox></div>
+                    </Checkbox> {result.query.qid} </div> 
                 })}
               </div>
             </div>
