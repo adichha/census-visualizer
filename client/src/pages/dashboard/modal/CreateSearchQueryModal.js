@@ -69,7 +69,6 @@ export const CreateSearchQueryModal = ({
       onCancel={onCancel}
       onOk={() => {
         updateValues();
-        console.log(form.getFieldsValue().database);
         form
           .validateFields()
           .then(values => {

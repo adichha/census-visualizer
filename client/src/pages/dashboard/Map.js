@@ -1,15 +1,16 @@
 import React, { Component } from 'react';
 import ReactMapGL, { Source, Layer } from 'react-map-gl';
 import { heatmapLayer } from './map-style';
-import { List, Switch as Toggle, Layout, Typography, Button, Checkbox } from 'antd';
+import { List, Layout, Typography, Button, Checkbox } from 'antd';
 import {
   PlusOutlined,
   DeleteOutlined,
   EditOutlined,
   SearchOutlined,
-  CopyOutlined
+  ShareAltOutlined as ShareOutlined
 } from '@ant-design/icons'
 import { UserStore } from '../../stores/UserStore';
+import { ShareQueryModal } from './modal/ShareQueryModal';
 import { CreateSearchQueryModal } from './modal/CreateSearchQueryModal';
 import { queries } from '@testing-library/react';
 import { Api } from '../../network/api/Api';
@@ -156,7 +157,8 @@ export class Map extends Component {
       sharedQueries: [],
       queryResults: [],
       isLoading: false,
-      username: ''
+      username: '',
+      shareModalVisible: false
     };
   }
 
@@ -337,14 +339,7 @@ export class Map extends Component {
 
   async runQueries() {
     this.setState({ queryResults: [], isLoading: true });
-    const queries = this.state.queries;
-    const queriesToRun = [];
-    let size = queries.length;
-    for (let i = 0; i < size; ++i) {
-      if (queries[i].selected) {
-        queriesToRun.push(queries[i].query.qid);
-      }
-    }
+    const queriesToRun = this.queriesSelected();
     const result = await Api.runQueries(queriesToRun);
     for (let i = 0; i < result.length; ++i) {
       if(i === 0) result[0].selected = true;
@@ -446,6 +441,22 @@ export class Map extends Component {
     }
   }
 
+  async shareMyQueries(queries){
+    await Api.shareQueries(queries)
+  }
+
+  queriesSelected(){
+    const queries = this.state.queries;
+    const result = [];
+    let size = queries.length;
+    for (let i = 0; i < size; ++i) {
+      if (queries[i].selected) {
+        result.push(queries[i].query.qid);
+      }
+    }
+    return result;
+  }
+
   onViewportChange = viewport => {
     const { width, height, ...etc } = viewport
     this.setState({ viewport: etc })
@@ -473,6 +484,21 @@ export class Map extends Component {
             })
           }}
         />
+        <ShareQueryModal
+            visible={this.state.shareModalVisible}
+            queries={
+              this.queriesSelected()
+            }
+            onCreate={(values) => {
+              this.shareMyQueries(values);
+              console.log(values)
+            }}
+            onCancel={() => {
+              this.setState({
+                shareModalVisible: false
+              })
+            }}
+        />
         <Sider theme='light' collapsible={false} collapsed={false} width={400} style={{ padding: 20 }}>
           <div style={{
             display: 'flex',
@@ -480,7 +506,7 @@ export class Map extends Component {
           }}>
             <Title level={3}>Query Builder</Title>
             <Button type="dashed" onClick={() => this.setState({ modalVisible: true })} icon={<PlusOutlined />} />
-            <Button type="dashed" disabled={!this.querySelected()} onClick={() => this.copyQueries()} icon={<CopyOutlined />} />
+            <Button type="dashed" disabled={!this.querySelected()} onClick={() => this.setState({ shareModalVisible: true })} icon={<ShareOutlined />} />
             <Button type="dashed" disabled={!this.querySelected()} onClick={() => this.deleteQueries()} icon={<DeleteOutlined />} />
             <Button type="dashed" loading={this.state.isLoading} disabled={!this.querySelected()} onClick={() => this.runQueries()} icon={<SearchOutlined />} />
             <br />
@@ -560,7 +586,7 @@ export class Map extends Component {
               </div>
 
                 <div className="control-panel2">
-                  <VisualQueryEditor queries={this.state.queryResults} onChange={(queries) => {this.setState({queryResults: queries}); }}/>
+                  <VisualQueryEditor queries={this.state.queryResults} onChange={(queries) => {console.log(queries); this.setState({queryResults: queries}); }}/>
                 </div>
             </div>
           </Content>

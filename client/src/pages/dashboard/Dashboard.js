@@ -26,7 +26,7 @@ function onChange(e) {
 export class Dashboard extends React.Component {
   state = {
     collapsed: false,
-    page: 1,
+    page: 0,
   };
 
   onCollapse = collapsed => {

@@ -94,7 +94,7 @@ export class Api {
   }
 
   static getSharedQueries = async (payload) => {
-    const data = await Api.createRequest(`user/shared_queries?username=Shabhazattack`, 'GET', payload);
+    const data = await Api.createRequest(`user/shared_queries`, 'GET', payload);
     return data;
   }
 
