@@ -650,7 +650,6 @@ export class Map extends Component {
                 {this.state.queryResults.map((result, index) => {
                   if (result.selected) {
                     const dto = this.state.queries.find((e) => e.query.qid === result.qid).query;
-                    console.log(dto);
                     let color = result.hue;
                     if(dto && dto.color) {
                       let a = this.colors[dto.color];
