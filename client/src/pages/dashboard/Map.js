@@ -586,7 +586,7 @@ export class Map extends Component {
                 query={query.query}
               ></CreateSearchQueryModal>
                 <List.Item><Checkbox checked={query.selected} onChange={() => this.toggleQuerySelected(index)}>
-                  {this.buildQuery(query.query)} (QID: <b>{query.query.qid}</b>)
+                  {this.buildQuery(query.query)} (Query <b>{query.query.qid}</b>)
                  </Checkbox><Button type="dashed" onClick={() => this.toggleModalVisible(index)} icon={<EditOutlined />} />
                 </List.Item></div>
             })}

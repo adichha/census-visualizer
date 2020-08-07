@@ -15,7 +15,7 @@ export class Legend extends React.Component {
         }
         return (
         <div className="floatleft">
-            <h4><span style={{backgroundColor: color}}></span>{'QID: ' + queryId}</h4>
+            <h4><span style={{backgroundColor: color}}></span>{'Query ' + queryId}</h4>
             <div id="state-legend" className="legend">
                 {entries.map((value, idx) => (
                     <h4><span style={{backgroundColor: color, opacity: (entries.length - idx)/entries.length}}></span>{value}</h4>
