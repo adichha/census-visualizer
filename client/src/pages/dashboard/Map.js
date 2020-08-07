@@ -642,19 +642,23 @@ export class Map extends Component {
               <div className="map-legends">
                 {this.state.queryResults.map((result, index) => {
                   if (result.selected) {
-                    const dto = this.state.queries.find((e) => e.query.qid === result.qid).query;
-                    let color = result.hue;
-                    if(dto && dto.color) {
-                      let a = this.colors[dto.color];
-                      color = `rgb(${a[0]},${a[1]},${a[2]})`
+                    const obj = this.state.queries.find((e) => e.query.qid === result.qid);
+                    if(obj) {
+                        const dto = obj.query;
+                        let color = result.hue;
+                        if (dto && dto.color) {
+                            let a = this.colors[dto.color];
+                            color = `rgb(${a[0]},${a[1]},${a[2]})`
+                        }
+                        if (this.state.overrides && this.state.overrides[result.qid] !== undefined) {
+                            let a = this.colors[this.state.overrides[result.qid]];
+                            color = `rgb(${a[0]},${a[1]},${a[2]})`
+                        }
+                        return (
+                            <Legend minimum={result.min} maximum={result.max} color={color} units={result.units}
+                                    queryId={result.qid}/>
+                        )
                     }
-                    if(this.state.overrides && this.state.overrides[result.qid] !== undefined) {
-                      let a = this.colors[this.state.overrides[result.qid]];
-                      color = `rgb(${a[0]},${a[1]},${a[2]})`
-                    }
-                    return (
-                      <Legend minimum={result.min} maximum={result.max} color={color} units={result.units} queryId={result.qid} />
-                    )
                   }
                 })}
               </div>
