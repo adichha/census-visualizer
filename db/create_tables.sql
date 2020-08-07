@@ -166,9 +166,9 @@ create table shared_queries
     uid int not null,
     primary key(qid, uid),
     constraint shared_queries_saved_queries_qid_fk
-        foreign key (qid) references saved_queries (qid),
+        foreign key (qid) references saved_queries (qid) on delete cascade ,
     constraint shared_queries_user_profiles_uid_fk
-        foreign key (uid) references user_profiles (uid)
+        foreign key (uid) references user_profiles (uid) on delete cascade
 );
 
 # No need to create manual indices; the above tables
