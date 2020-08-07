@@ -89,23 +89,23 @@ const sexLUTReverse = {
 };
 
 const ageLUT = {
-  1: "all", // probably don't need
+  1: "all",
   2: "15-24",
-  3: "25-34",
-  4: "35-44",
-  5: "45-54",
-  6: "55-64",
-  7: "65+"
+  5: "25-34",
+  6: "35-44",
+  7: "45-54",
+  8: "55-64",
+  9: "65+"
 }
 
 const ageLUTReverse = {
   "all": 1,
   "15-24": 2,
-  "25-34": 3,
-  "35-44": 4,
-  "45-54": 5,
-  "55-64": 6,
-  "65+": 7
+  "25-34": 5,
+  "35-44": 6,
+  "45-54": 7,
+  "55-64": 8,
+  "65+": 9
 }
 
 export class FriendsPage extends React.Component {
@@ -304,7 +304,6 @@ export class FriendsPage extends React.Component {
   }
 
   render() {
-    console.log(this.state.friends)
     const onSelect = async (data) => {
       const username = data.split(":")[0];
       await Api.addFriend([username]);
@@ -377,8 +376,6 @@ export class FriendsPage extends React.Component {
           })} />
 
         </Modal>
-        <Title level={4}>Shared Queries</Title>
-        <Input.Search size="large" placeholder="import your friend's query here" onSearch={value => console.log(value)} enterButton="Copy" />
       </div >
     );
   }

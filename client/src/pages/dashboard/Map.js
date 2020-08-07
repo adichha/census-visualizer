@@ -109,23 +109,23 @@ const sexLUTReverse = {
 };
 
 const ageLUT = {
-  1: "all", // probably don't need
+  1: "all",
   2: "15-24",
-  3: "25-34",
-  4: "35-44",
-  5: "45-54",
-  6: "55-64",
-  7: "65+"
+  5: "25-34",
+  6: "35-44",
+  7: "45-54",
+  8: "55-64",
+  9: "65+"
 }
 
 const ageLUTReverse = {
   "all": 1,
   "15-24": 2,
-  "25-34": 3,
-  "35-44": 4,
-  "45-54": 5,
-  "55-64": 6,
-  "65+": 7
+  "25-34": 5,
+  "35-44": 6,
+  "45-54": 7,
+  "55-64": 8,
+  "65+": 9
 }
 
 const employmentLUT = {
@@ -179,6 +179,8 @@ export class Map extends Component {
   async fetchData() {
     const userQueries = await Api.fetchAllQueries();
     const sharedQueries = await Api.getSharedQueries();
+    console.log("ETSTETSET")
+    console.log(sharedQueries)
     const apiQueries = [...userQueries, ...sharedQueries];
     let queries = [];
     for (let i = 0; i < apiQueries.length; ++i) {
@@ -469,6 +471,7 @@ export class Map extends Component {
 
   async shareMyQueries(queries){
     await Api.shareQueries(queries)
+    this.setState({shareModalVisible: false})
   }
 
   queriesSelected(){
@@ -555,7 +558,7 @@ export class Map extends Component {
             }
             onCreate={(values) => {
               this.shareMyQueries(values);
-              console.log(values)
+        
             }}
             onCancel={() => {
               this.setState({

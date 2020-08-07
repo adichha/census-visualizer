@@ -24,15 +24,9 @@ export const ShareQueryModal = ({
       };
   
       const onSearch = async (searchText) => {
-        // Api.searchFriend(searchText).then(entriesRet => {
-        //     setEntries(entriesRet.map(obj => `${obj.username}: ${obj.firstName} ${obj.lastName}`));
-        // })
         const friends = await Api.fetchFriends();
         setEntries(friends.map(obj => `${obj.username}: ${obj.firstName} ${obj.lastName}`));
-        console.log(friends)
     }
-   
-      
 
   return (
     <Modal
@@ -44,8 +38,9 @@ export const ShareQueryModal = ({
           onCancel();
           setEntries([])
           setValue('')
+          setFriendsVal([])
         }
-        }
+    }
       onOk={() => {
         console.log("test")
         console.log(queries)
@@ -59,7 +54,9 @@ export const ShareQueryModal = ({
             }
         }
         onCreate(result)
-        console.log(result)
+        setEntries([])
+        setValue('')
+        setFriendsVal([])
       }}
     >
         <div style={{ display: 'flex', width: '100%' }}>
