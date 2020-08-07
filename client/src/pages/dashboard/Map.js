@@ -230,7 +230,6 @@ export class Map extends Component {
 
       queries.push(queryWrapper);
     }
-    console.log(queries);
     this.setState({ queries: queries });
   }
 
