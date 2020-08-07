@@ -109,7 +109,7 @@ export class VisualQueryEditor extends Component {
             const min = (a, b) => {if(a < b) return a; else return b;};
 
             const mag = q[index].heatmap.paint["heatmap-weight"][5];
-            const weight = ["interpolate", ["cubic-bezier", max(curve[0], 0), max(curve[1], 0), min(curve[2], 1), min(curve[3], 1)], ["get", "mag"], 0, 0, mag, 1];
+            const weight = ["interpolate", ["cubic-bezier", max(curve[0], 0), min(curve[1], 1), max(curve[2], 0), min(curve[3], 1)], ["get", "mag"], 0, 0, mag, 1];
 
             q[index].heatmap.paint["heatmap-weight"] = weight;
             q[index].selected = false;
