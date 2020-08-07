@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 export class Legend extends React.Component {
+
     render() {
         const { minimum, maximum, color, units, queryId } = this.props;
         let entries = []

@@ -92,6 +92,7 @@ export class VisualQueryEditor extends Component {
             q[index].heatmap.paint["heatmap-color"] = this.makeNewColors(this.colors[colorIndex]);
             q[index].selected = false;
             q[index].postSelect = true;
+            this.props.onColorChange(this.state.selected, colorIndex);
             this.props.onChange(q);
         }
     };
