@@ -77,7 +77,7 @@ export class Settings extends Component {
                 <Col span={12} offset={6}>
                   <Card style={{textAlign: 'center'}}>
                     <div><Avatar size={64} icon={iconMap[this.state.icon]} onClick={() => this.setState({showModal: true})} /></div>
-                    <Descriptions title="User Info">
+                    <Descriptions style={{marginTop: "20px"}} title="User Info">
                     <Descriptions.Item label="Username">{this.state.username}</Descriptions.Item>
                     <Descriptions.Item label="First Name">{this.state.first}</Descriptions.Item>
                     <Descriptions.Item label="Last Name">{this.state.last}</Descriptions.Item>

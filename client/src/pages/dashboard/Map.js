@@ -218,7 +218,9 @@ export class Map extends Component {
         income: income,
         employment: employment,
         sex: sex,
-        age: age
+        age: age,
+        color: apiQuery.color,
+        curve: apiQuery.curve
       };
       const queryWrapper = {
         "query": query,
@@ -228,6 +230,7 @@ export class Map extends Component {
 
       queries.push(queryWrapper);
     }
+    console.log(queries);
     this.setState({ queries: queries });
   }
 
@@ -267,6 +270,23 @@ export class Map extends Component {
     const message = "Select " + result + " from " + this.state.username 
     navigator.clipboard.writeText(message)
   }
+
+  saveDto = async (query) => {
+    console.log(query);
+    // push to API
+    const ret = await this.saveQuery(query);
+    console.log(ret);
+    if(ret) {
+      let q = this.state.queries;
+      // push to memory
+      const index = q.findIndex((e) => e.query.qid === query.qid);
+      q[index].query = query;
+      this.setState({
+        queries: q
+      })
+    }
+  };
+
   async saveQuery(query) {
     const params = [];
     if (query.database === "education") {
@@ -313,6 +333,12 @@ export class Map extends Component {
     } else apiQuery[0].sex = 1;
     if (query.qid) {
       apiQuery[0].qid = query.qid;
+    }
+    if(query.color) {
+      apiQuery[0].color = query.color;
+    }
+    if(query.curve) {
+      apiQuery[0].curve = query.curve;
     }
     return await Api.saveQuery(apiQuery);
   }
@@ -462,8 +488,46 @@ export class Map extends Component {
     this.setState({ viewport: etc })
   }
 
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if(this.state.queryResults) {
+      var anyUpdated = false;
+      let q = this.state.queryResults;
+      for(var i = 0; i < q.length; i ++) {
+        if(q[i].postSelect) {
+          anyUpdated = true;
+          q[i].selected = true;
+          q[i].postSelect = false;
+        }
+      }
+      if(anyUpdated)
+        this.setState({queryResults: q});
+    }
+  }
+
+  overrideColor = (qid, color) => {
+    let overrides = {};
+    if(this.state.overrides) {
+      overrides = {...this.state.overrides};
+    }
+    overrides[qid] = color;
+    console.log(overrides);
+    this.setState({
+      overrides: overrides
+    });
+  };
+
+  colors = [
+    [69, 195, 229],
+    [229, 181, 69],
+    [184, 69, 229],
+    [147, 229, 69],
+    [229, 93, 69],
+    [229, 138, 69],
+    [69, 229, 203]
+  ];
+
   render() {
-    const { mapStyle} = this.state;
+    const { viewport, data, allDay, selectedTime, startTime, endTime, mapStyle, isShowFirstLayer, isShowSecondLayer } = this.state;
 
     return (
       <Layout style={{ minHeight: '100%' }}>
@@ -538,7 +602,7 @@ export class Map extends Component {
                 query={query.query}
               ></CreateSearchQueryModal>
                 <List.Item><Checkbox checked={query.selected} onChange={() => this.toggleQuerySelected(index)}>
-                  {this.buildQuery(query.query)} (QID: <b>{query.query.qid}</b>)
+                  {this.buildQuery(query.query)} (Query <b>{query.query.qid}</b>)
                  </Checkbox><Button type="dashed" onClick={() => this.toggleModalVisible(index)} icon={<EditOutlined />} />
                 </List.Item></div>
             })}
@@ -571,22 +635,36 @@ export class Map extends Component {
                 <hr />
                 {this.state.queryResults.map((result, index) => {
                   return <div>
-          <Checkbox checked={result.selected} onChange={() => this.toggleResultSelected(index)}>{}
-                    </Checkbox> {result.qid} </div> 
+                    <Checkbox checked={result.selected} onChange={() => this.toggleResultSelected(index)}>
+                    </Checkbox> Query {result.qid}
+                  </div>
                 })}
               </div>
               <div className="map-legends">
                 {this.state.queryResults.map((result, index) => {
                   if (result.selected) {
+                    const dto = this.state.queries.find((e) => e.query.qid === result.qid).query;
+                    let color = result.hue;
+                    if(dto && dto.color) {
+                      let a = this.colors[dto.color];
+                      color = `rgb(${a[0]},${a[1]},${a[2]})`
+                    }
+                    if(this.state.overrides && this.state.overrides[result.qid] !== undefined) {
+                      let a = this.colors[this.state.overrides[result.qid]];
+                      color = `rgb(${a[0]},${a[1]},${a[2]})`
+                    }
                     return (
-                      <Legend minimum={result.min} maximum={result.max} color={result.hue} units={result.units} queryId={result.qid} />
+                      <Legend minimum={result.min} maximum={result.max} color={color} units={result.units} queryId={result.qid} />
                     )
                   }
                 })}
               </div>
 
                 <div className="control-panel2">
-                  <VisualQueryEditor queries={this.state.queryResults} onChange={(queries) => {console.log(queries); this.setState({queryResults: queries}); }}/>
+                  <VisualQueryEditor queries={this.state.queryResults} dtos={this.state.queries}
+                                     onChange={(queries) => {this.setState({queryResults: queries}); }}
+                                     onColorChange={(qid, color) => this.overrideColor(qid, color)}
+                                      onSaveDto={(query) => this.saveDto(query)}/>
                 </div>
             </div>
           </Content>

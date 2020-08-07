@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './editor.css';
 import BezierEditor from "bezier-easing-editor";
 import {Button, Radio, Select} from "antd";
+import {UserStore} from "../../stores/UserStore";
 
 export class VisualQueryEditor extends Component {
 
@@ -22,31 +23,6 @@ export class VisualQueryEditor extends Component {
         } else if(this.state.selected && nextProps.queries.length === 0) {
             this.setState({selected: null})
         }
-    }
-
-    hslToRgb(h, s, l){
-        var r, g, b;
-
-        if(s == 0){
-            r = g = b = l; // achromatic
-        }else{
-            var hue2rgb = function hue2rgb(p, q, t){
-                if(t < 0) t += 1;
-                if(t > 1) t -= 1;
-                if(t < 1/6) return p + (q - p) * 6 * t;
-                if(t < 1/2) return q;
-                if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-                return p;
-            }
-
-            var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-            var p = 2 * l - q;
-            r = hue2rgb(p, q, h + 1/3);
-            g = hue2rgb(p, q, h);
-            b = hue2rgb(p, q, h - 1/3);
-        }
-
-        return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
     }
 
     makeNewColors(c) {
@@ -78,8 +54,11 @@ export class VisualQueryEditor extends Component {
         if(this.state.selected !== nextState.selected) {
             // update curve and color
             if(nextState.selected) {
-                const q = this.props.queries[nextState.selected];
-                if(!q) return;
+                let dtos = this.props.dtos;
+                let index = dtos.findIndex((e) => e.query.qid === nextState.selected);
+                let q = dtos[index].query;
+                console.log("selected");
+                console.log(q);
                 // fetch from query
                 this.setState({
                     color: q.color,
@@ -110,7 +89,10 @@ export class VisualQueryEditor extends Component {
             this.setState({color: colorIndex});
             let q = this.props.queries;
             let index = q.findIndex((e) => e.qid === this.state.selected);
-            q[index].heatmap.paint["heatmap-color"] = this.makeNewColors(this.colors[parseInt(colorIndex)]);
+            q[index].heatmap.paint["heatmap-color"] = this.makeNewColors(this.colors[colorIndex]);
+            q[index].selected = false;
+            q[index].postSelect = true;
+            this.props.onColorChange(this.state.selected, colorIndex);
             this.props.onChange(q);
         }
     };
@@ -127,10 +109,11 @@ export class VisualQueryEditor extends Component {
             const min = (a, b) => {if(a < b) return a; else return b;};
 
             const mag = q[index].heatmap.paint["heatmap-weight"][5];
-            const weight = ["interpolate", ["cubic-bezier", max(curve[0], 0), max(curve[1], 0), min(curve[2], 1), min(curve[3], 1)], ["get", "mag"], 0, 0, mag, 1];
+            const weight = ["interpolate", ["cubic-bezier", max(curve[0], 0), min(curve[1], 1), max(curve[2], 0), min(curve[3], 1)], ["get", "mag"], 0, 0, mag, 1];
 
             q[index].heatmap.paint["heatmap-weight"] = weight;
-
+            q[index].selected = false;
+            q[index].postSelect = true;
             this.props.onChange(q);
         }
 
@@ -142,7 +125,12 @@ export class VisualQueryEditor extends Component {
 
     save = () => {
         if(this.state.selected) {
-
+            let dtos = this.props.dtos;
+            let index = dtos.findIndex((e) => e.query.qid === this.state.selected);
+            let query = dtos[index].query;
+            query.color = this.state.color;
+            query.curve = this.state.curve;
+            this.props.onSaveDto(query);
         }
     };
 
@@ -162,12 +150,12 @@ export class VisualQueryEditor extends Component {
                 </Select>
                 <span>Color</span>
                 <Radio.Group style={{display: "inline-flex", direction: "row"}} value={this.state.color} onChange={ev => this.changeColor(ev.target.value)}>
-                    <Radio.Button value="0" style={{padding: 0}}><div className="swatch1"/></Radio.Button>
-                    <Radio.Button value="1" style={{padding: 0}}><div className="swatch2"/></Radio.Button>
-                    <Radio.Button value="2" style={{padding: 0}}><div className="swatch3"/></Radio.Button>
-                    <Radio.Button value="3" style={{padding: 0}}><div className="swatch4"/></Radio.Button>
-                    <Radio.Button value="4" style={{padding: 0}}><div className="swatch5"/></Radio.Button>
-                    <Radio.Button value="5" style={{padding: 0}}><div className="swatch6"/></Radio.Button>
+                    <Radio.Button value={0} style={{padding: 0}}><div className="swatch1"/></Radio.Button>
+                    <Radio.Button value={1} style={{padding: 0}}><div className="swatch2"/></Radio.Button>
+                    <Radio.Button value={2} style={{padding: 0}}><div className="swatch3"/></Radio.Button>
+                    <Radio.Button value={3} style={{padding: 0}}><div className="swatch4"/></Radio.Button>
+                    <Radio.Button value={4} style={{padding: 0}}><div className="swatch5"/></Radio.Button>
+                    <Radio.Button value={5} style={{padding: 0}}><div className="swatch6"/></Radio.Button>
                 </Radio.Group>
                 <span>Data curve</span>
                 <BezierEditor className="editor" value={this.state.curve}
