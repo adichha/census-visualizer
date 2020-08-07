@@ -216,7 +216,9 @@ export class Map extends Component {
         income: income,
         employment: employment,
         sex: sex,
-        age: age
+        age: age,
+        color: apiQuery.color,
+        curve: apiQuery.curve
       };
       const queryWrapper = {
         "query": query,
@@ -226,6 +228,7 @@ export class Map extends Component {
 
       queries.push(queryWrapper);
     }
+    console.log(queries);
     this.setState({ queries: queries });
   }
 
@@ -265,6 +268,23 @@ export class Map extends Component {
     const message = "Select " + result + " from " + this.state.username 
     navigator.clipboard.writeText(message)
   }
+
+  saveDto = async (query) => {
+    console.log(query);
+    // push to API
+    const ret = await this.saveQuery(query);
+    console.log(ret);
+    if(ret) {
+      let q = this.state.queries;
+      // push to memory
+      const index = q.findIndex((e) => e.query.qid === query.qid);
+      q[index].query = query;
+      this.setState({
+        queries: q
+      })
+    }
+  };
+
   async saveQuery(query) {
     const params = [];
     if (query.database === "education") {
@@ -311,6 +331,12 @@ export class Map extends Component {
     } else apiQuery[0].sex = 1;
     if (query.qid) {
       apiQuery[0].qid = query.qid;
+    }
+    if(query.color) {
+      apiQuery[0].color = query.color;
+    }
+    if(query.curve) {
+      apiQuery[0].curve = query.curve;
     }
     return await Api.saveQuery(apiQuery);
   }
@@ -609,7 +635,9 @@ export class Map extends Component {
               </div>
 
                 <div className="control-panel2">
-                  <VisualQueryEditor queries={this.state.queryResults} onChange={(queries) => {this.setState({queryResults: queries}); }}/>
+                  <VisualQueryEditor queries={this.state.queryResults} dtos={this.state.queries}
+                                     onChange={(queries) => {this.setState({queryResults: queries}); }}
+                                      onSaveDto={(query) => this.saveDto(query)}/>
                 </div>
             </div>
           </Content>
