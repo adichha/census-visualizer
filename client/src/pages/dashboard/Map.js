@@ -662,6 +662,9 @@ export class Map extends Component {
                                     queryId={result.qid}/>
                         )
                     }
+                    return (
+                      <Legend minimum={result.min} maximum={result.max} color={color} units={result.units} queryId={result.qid} bezier={[0,0,1,1]} />
+                    )
                   }
                 })}
               </div>
