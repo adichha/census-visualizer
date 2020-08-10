@@ -1,5 +1,27 @@
--- Hard-coded SQL queries that fetch data from the different data categories
--- Filtering by age, sex, and meta parameters
+-- Below is a just a sample of the queries that we execute on the database
+
+
+-- Feature 1 : Creating queries
+-- This query shows a sample insertion
+INSERT INTO saved_queries (uid, last_updated, query)
+VALUES (1, NOW(), '{
+  "key1": "value1"
+}');
+
+
+-- Feature 2 : Getting saved queries
+-- This query shows a sample lookup for all the shared queries of a user
+SELECT query
+FROM saved_queries
+WHERE uid in (
+    SELECT uid
+    FROM user_profiles
+    WHERE username = 'johndoe@gmail.com6'
+)
+;
+
+-- Feature 3 : Querying and filtering data from the datasets
+-- Sample queries for filtering based on age, sex, and meta parameters
 SELECT lon, lat, SUM(value)
 FROM education
          NATURAL JOIN geocode_lut
@@ -46,6 +68,34 @@ WHERE e.meta IN :metas
   AND p.geocode = g.geocode
 GROUP BY g.geocode, g.lon, g.lat;
 
+
+-- Feature 4 : Friends
+-- This query shows searching for friends
+SELECT *
+FROM user_profiles
+WHERE visibility = 'public'
+    AND username LIKE '%johnny%'
+   OR first_name LIKE '%john%'
+   OR last_name LIKE 'doe'
+ORDER BY username DESC
+LIMIT 25;
+
+
+-- Feature 5 : Update saved queries
+UPDATE saved_queries
+SET query = '{
+  "key1": "value1"
+}'
+WHERE uid = 1 AND qid = 2;
+
+
+-- Feature 6 : Deleting saved queries
+DELETE FROM saved_queries
+WHERE uid = 1 AND qid = 2;
+
+
+-- Feature 7 : Login/logout and user-profiles
+
 -- Get a user profile
 SELECT *
 FROM user_profiles
@@ -59,31 +109,3 @@ VALUES ('johndoe@gmail.com', 'John2', 'Doe2', 'uw', 'cs247', 5);
 SELECT token
 FROM login_tokens
 WHERE username = 'johnny';
-
--- Search for users
--- For final demo, the visibility of profiles will be enabled
-SELECT *
-FROM user_profiles
-WHERE visibility = 'public'
-    AND username LIKE '%johnny%'
-   OR first_name LIKE '%john%'
-   OR last_name LIKE 'doe'
-ORDER BY username DESC
-LIMIT 25;
-
--- Get the saved queries for the user
-SELECT query
-FROM saved_queries
-WHERE uid in (
-    SELECT uid
-    FROM user_profiles
-    WHERE username = 'johndoe@gmail.com6'
-)
-;
-
--- Create a saved query
-INSERT INTO saved_queries (uid, last_updated, query)
-VALUES (1, NOW(), '{
-  "key1": "value1"
-}');
-
