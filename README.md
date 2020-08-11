@@ -42,17 +42,75 @@ To populate the meta lut's, such as age_range_lut and income_meta_lut, execute t
 
 ## Implemented Features
 
-- Add triggers to automatically update certain database fields, including last modified time, and number of queries.
-- Create indexes on data tables to speed up query performance. Reduced average query time from > 1 minute to ~ 2 seconds. 
-- DB Modification - Implement functionality for users to save queries of interest.
-- DB design - Easy database extensibility with lookup tables for quickly adding additional datasets
-- DB design - First class support for spatial data in the database for geographic visualizations (crucial part of our application)
-- DB design - native JSON support within the database to retrieve JSON objects directly from the DB through SQL
-- DB modification - Friends features:
-- View and saving their queries as your own
-- Database security - added authentication between backend and DBMS (as they run on seperate machines) to provide secure access
+1. __Creating queries__
+Whenever a user creates a new “query” on the frontend and saves it, the backend runs an insert query to persist it in the user_queries table. Immediately following this, a DB trigger runs to update the query count in the user_profiles table. __Optimization:__ Triggers were added to automatically update certain database fields, including last modified time, and number of queries. When a query is initially created or edited by the user, the last updated column for the query table is updated to be the current time. When the user creates/deletes the query, we increment/decrement the field that tracks the number of queries owned by the user.
 
-The triggers and indexs are in the create_table.sql. The CRUD freatures can be found in the code for the backend in the folder backend/source/main/kotlin/com/beanz/censusviz/repos.
+2. __Getting saved queries__ 
+The user can see all the queries that they have saved. This is done by selecting all entries in the saved_table relation with the same uid as the uid associated with the current user’s username. This query will reflect a user’s current saved queries after creating/editing/deleting queries is done.
+
+3. __Querying and filtering data for education, employment, population, and individual income data__
+Give users the ability to query for and filter the census data for the categories listed above. Based on the specific parameters selected by the user, we run a custom SQL query on the backend, and return the data. Generally, each query generally performs a selection operation to filter by parameters like age, and sex, then does a join with the geocode_lut table to determine the geographic location of each record. These are then grouped by common parameters, and aggregated with a function (SUM, AVERAGE, etc) and the final result is returned. Sample Query that fetches data by geocode for education Sample Query to return a normalized response by geocode for employment __Optimization__: We were struggling with query performance when we started using our production dataset given that it was around ~4GB in size. We created indices that reflected the nature of our queries - on sex, age, and meta - to reduce query time to ~10 seconds.
+The following is a sample index created for the income table:
+
+4. __Friends__
+Get all users from the database as well as search for a specific user. We support fuzzy searching on the frontend by using wildcards on the username, user first name, and user last name parameters in the executed SQL query. As well, only users who have their visibility set as public will appear in these searches. View the queries of a friend and copy them to be your own. To view the friend’s queries, we get the friend’s username from the frontend. With this, we find the uid of the friend and find all of the queries they own in the saved_queries table. These are returned to you. This query follows the same format as getting a user’s saved queries from feature 2. To perform a copy operation, you select a specific query on the frontend. Based on the uid of your friend and the qid of the selected query, we locate it in the shared_queries table, duplicate it, and insert it as a new record, this time as a query owned by you. This query will cause a series of insertions with the same format as the insert operation from feature 1a.  Adding friends This operation is made possible by the search operation of friends described above. Once the user has selected a list of people they would like to be friends with, we insert a record in the user_friends relation for each intended friendship.
+
+5. __Updating saved queries__
+This allows users to edit the saved queries they have previously created. Upon clicking “save” on the frontend, we execute an update statement on the saved_queries table in the DB. The query to modify is located based on qid, and then the new parameters (age, sex, bezier, meta) are stored.
+Data is visualized using a linear curve for normalization purposes. However, this can lead to query results that simply do not have enough contrast to be visible. Therefore, queries can also be modified with a custom bezier to accentuate features of interest - like making the brighter spots areas more intense, or brightening the areas that are currently shaded lightly. Once the user is satisfied with the color/shading property of a query and hits save, these features are persisted via an update query on the database by finding the entry based on qid.
+The SQL query for updating saved queries follows the same logic as creating saved queries. 
+
+6. __Deleting saved queries__
+This allows users to delete queries that they own. The user can select the queries they wish to delete and a list of the query ids is sent to the backend to be deleted. 
+Queries are located in the saved_queries table based on the uid of the user and qid of the query. We then perform a transactional delete operation.
+
+7. __Login/logout authentication and user profiles__
+In order to use our application, users must register providing the username, first name, last name, and their password. This inserts a record into the user_profiles relationship. On a successful login, a user is issued a token that authenticates them to perform actions on our application. This token is persisted for the duration of the user’s session in the login_tokens table, and cleared on a logout. Furthermore, this token serves as the identification of a user. On every request to the backend, we lookup the uid associated with this token, which is then used to facilitate the requested operation. When a user wants to log into the application, their credentials are verified by querying the profile in the user_profiles relationship. Users have the ability to set certain preferences on their profile. This includes whether or not they would like to view the map visualization in light mode/dark mode, as well as set a profile avatar. These settings are stored on the user_profile, with provided functionality implemented by update queries to adjust these settings. These are fetched whenever the user logs in for a new session, and the UI renders with these custom settings.
+
+The features we implemented:
+We implemented all the features listed above in our project. Below are the files containing the core business logic and database interaction required for the implementation of each delivered feature. The database DDL (containing table definitions, indices, and triggers) is “db/create_tables.sql”.
+
+
+__Feature #1__
+CreateSearchQueryModal.js
+UserQueryController.kt
+SavedQueriesRepo.kt
+
+__Feature #2__
+Map.js
+UserQueryController.kt
+SavedQueriesRepo.kt
+
+__Feature #3__
+Map.js
+UserQueryController.kt
+DatasetPopulationRepo.kt
+DatasetEducationRepo.kt
+DatasetEmploymentRepo.kt
+DatasetIncomesRepo.kt
+
+__Feature #4__
+FriendsPage.js 
+SharedQueriesRepo.kt
+FriendProfileRepo.kt
+UserQueryController.kt
+
+__Feature #5__
+CreateSearchQueryModal.js 
+UserQueryController.kt
+SavedQueriesRepo.kt
+
+__Feature #6__
+Map.js
+UserQueryController.kt
+SavedQueriesRepo.kt
+
+__Feature #7__
+LoginPage.js, RegisterPage.js
+UserProfileController.kt
+UserQueryController.kt
+UserProfile.kt
+LoginTokenRepo.kt
 
 ## Features To Do
 - Add the ability for users to mark their saved queries as private or public to enable visibility for other users.
